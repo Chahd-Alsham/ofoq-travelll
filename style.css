@@ -1754,3 +1754,14 @@ div:has(> #previewTaxFees) {
     border-bottom: none !important;
     box-shadow: none !important;
 }
+/* إظهار العبارة بشكل دائم على الشاشة وفي الطباعة */
+.page-break-footer-notice {
+    display: block; 
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #555;
+    padding: 10px 0;
+    margin-top: 15px;
+    border-top: 1px dashed #bbb;
+}

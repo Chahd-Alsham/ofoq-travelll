@@ -1156,13 +1156,24 @@ function updateLivePreview() {
             passListContainer.appendChild(row);
         });
     }
-    // 4. Flights Preview
+// 4. Flights Preview
     const flightsListContainer = document.getElementById('previewFlightsList');
     flightsListContainer.innerHTML = '';
     if (workingFlights.length === 0) {
         flightsListContainer.innerHTML = `<div class="text-muted" style="font-size:11px;">لا توجد رحلات مدرجة</div>`;
     } else {
         workingFlights.forEach((f, idx) => {
+            // If Transit, show waiting banner FIRST so it appears above the card
+            if (f.type === 'Transit' && f.transitWaiting) {
+                const transitBox = document.createElement('div');
+                transitBox.className = 'transit-waiting-banner';
+                transitBox.innerHTML = `
+                    <span><i class="fa-solid fa-clock"></i> TRANSIT WAITING TIME (${f.depCity})</span>
+                    <span>${f.transitWaiting}</span>
+                `;
+                flightsListContainer.appendChild(transitBox);
+            }
+
             // Find airline logo if exists
             let airlineObj = airlinesList.find(al => al.name === f.airline);
             let airlineLogoHtml = `<i class="fa-solid fa-plane"></i>`;
@@ -1228,7 +1239,7 @@ function updateLivePreview() {
                             <span>${companySettings.nameAr || 'أفق للطيران'} — Ofoq Travel</span>
                         </div>
                         <div class="page-2-badge">
-                            <span>تابع جدول الرحلات (صفحة 2 من 2) ${pnrText ? `| PNR: ${pnrText}` : ''}</span>
+                            <span>تابع جدول الرحلات في صفحة تالية ${pnrText ? `| PNR: ${pnrText}` : ''}</span>
                         </div>
                     </div>
                 `;
@@ -1236,20 +1247,8 @@ function updateLivePreview() {
             }
 
             flightsListContainer.appendChild(card);
-
-            // If Transit, show waiting banner
-            if (f.type === 'Transit' && f.transitWaiting) {
-                const transitBox = document.createElement('div');
-                transitBox.className = 'transit-waiting-banner';
-                transitBox.innerHTML = `
-                    <span><i class="fa-solid fa-clock"></i> TRANSIT WAITING TIME (${f.depCity})</span>
-                    <span>${f.transitWaiting}</span>
-                `;
-                flightsListContainer.appendChild(transitBox);
-            }
         });
     }
-
 // 5. Pricing & Totals Calculation
     const baseFare = parseFloat(document.getElementById('baseFare').value) || 0;
     const taxFees = parseFloat(document.getElementById('taxFees').value) || 0;
