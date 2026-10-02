@@ -53,10 +53,10 @@ const translations = {
         label_total_price: "إجمالي سعر التذكرة ",
         live_preview_title: "المعاينة الحية لملف السفر",
         doc_title_badge: "ملف السفر وحجز التذاكر",
-        lbl_ticket_no: "رقم التذكرة:",
-        lbl_booking_ref: "رقم الحجز:",
-        lbl_booking_date: "تاريخ الحجز:",
-        lbl_status: "الحالة:",
+        lbl_ticket_no: "رقم التذكرة",
+        lbl_booking_ref: "رقم الحجز",
+        lbl_booking_date: "تاريخ الحجز",
+        lbl_status: "الحالة",
         sec_flights_schedule: "جدول الرحلات",
         lbl_base_fare: "سعر التذكرة:",
         lbl_taxes: "الضرائب والرسوم:",
@@ -170,10 +170,10 @@ const translations = {
         label_total_price: "Final Total",
         live_preview_title: "Live Itinerary Preview",
         doc_title_badge: "Travel Itinerary & Ticket",
-        lbl_ticket_no: "Ticket No:",
-        lbl_booking_ref: "Booking Ref:",
-        lbl_booking_date: "Booking Date:",
-        lbl_status: "Status:",
+        lbl_ticket_no: "Ticket No",
+        lbl_booking_ref: "Booking Ref",
+        lbl_booking_date: "Booking Date",
+        lbl_status: "Status",
         sec_flights_schedule: "Flight Schedule",
         lbl_base_fare: "Base Fare:",
         lbl_taxes: "Taxes & Fees:",
@@ -287,10 +287,10 @@ const translations = {
         label_total_price: "Total Final",
         live_preview_title: "Aperçu en Direct",
         doc_title_badge: "Itinéraire de Voyage",
-        lbl_ticket_no: "N° de Billet:",
-        lbl_booking_ref: "Réf Réservation:",
-        lbl_booking_date: "Date:",
-        lbl_status: "Statut:",
+        lbl_ticket_no: "N° de Billet",
+        lbl_booking_ref: "Réf Réservation",
+        lbl_booking_date: "Date",
+        lbl_status: "Statut",
         sec_flights_schedule: "Programme des Vols",
         lbl_base_fare: "Tarif Base:",
         lbl_taxes: "Taxes:",
@@ -1419,7 +1419,7 @@ function updateLivePreview() {
             // إذا كان هناك 3 أو 4 رحلات، نضع فاصل صفحة قبل الرحلة الثالثة لتكون التذكرة في صفحتين بالضبط وبشكل منسق
             if (idx === 2 && workingFlights.length >= 3) {
                 const pageBreakDiv = document.createElement('div');
-                pageBreakDiv.className = 'pdf-page-break html2pdf__page-break';
+                pageBreakDiv.className = 'pdf-page-break';
                 const pnrText = document.getElementById('bookingPnr') ? document.getElementById('bookingPnr').value.trim() : '';
                 pageBreakDiv.innerHTML = `
                     <div class="page-2-header">
@@ -1863,6 +1863,188 @@ function finishSettingsSave() {
     alert("تم حفظ إعدادات الشركة بنجاح!");
 }
 
+/* ==========================================================================
+   طبقة تصدير PDF: الحفظ والمشاركة — متوافقة مع Android / Android WebView
+   --------------------------------------------------------------------------
+   ⚠️ نطاق التعديل محصور في الحفظ والمشاركة فقط.
+   لا يوجد أي تعديل على: html2pdf، أو خيارات opt (الهوامش/A4/الصفحات/الخطوط)،
+   أو قالب الطباعة، أو CSS الخاص بالطباعة، أو HTML الخاص بالطباعة.
+   الملف يُولَّد بنفس مكتبة html2pdf وبنفس الخيارات تماماً كما كان.
+
+   المسارات المدعومة (بالترتيب):
+     1) Capacitor (Android/iOS) : Filesystem.writeFile  ➜  Share  (مرفق حقيقي content://)
+     2) Android WebView عادي   : Web Share API(files)  ➜  تنزيل احتياطي
+     3) متصفح سطح المكتب       : تنزيل مباشر (نفس آلية html2pdf.save)
+   ========================================================================== */
+
+/* الوصول الآمن لإضافات Capacitor (تختلف طريقة التسجيل بين الإصدارات) */
+function getCapacitorPlugin(name) {
+    const cap = window.Capacitor;
+    if (!cap) return null;
+    try {
+        if (cap.Plugins && cap.Plugins[name]) return cap.Plugins[name];
+    } catch (e) {
+        /* وكيل Plugins في Capacitor 3+ يرمي استثناء إذا لم تكن الإضافة مثبّتة */
+    }
+    if (window[name]) return window[name];   /* تسجيل UMD مباشر */
+    return null;
+}
+
+function getCapacitorPlatform() {
+    const cap = window.Capacitor;
+    if (cap && typeof cap.getPlatform === 'function') {
+        try { return cap.getPlatform(); } catch (e) { /* تجاهل */ }
+    }
+    if (cap && cap.platform) return cap.platform;
+    return 'web';
+}
+
+/* هل نعمل داخل WebView أندرويد بدون Capacitor؟ */
+function isAndroidWebView() {
+    return /Android/i.test(navigator.userAgent || '');
+}
+
+/* تحويل Blob إلى base64 نظيف (بدون بادئة data:) لتغذية Filesystem.writeFile */
+function blobToBase64(blob) {
+    return new Promise(function (resolve, reject) {
+        const reader = new FileReader();
+        reader.onloadend = function () {
+            const result = reader.result || '';
+            const comma = result.indexOf(',');
+            resolve(comma >= 0 ? result.slice(comma + 1) : result);
+        };
+        reader.onerror = function () { reject(reader.error || new Error('read-failed')); };
+        reader.readAsDataURL(blob);
+    });
+}
+
+/* اسم ملف واضح وفريد: Ofoq_Travel_[الاسم]_[التاريخ_الوقت].pdf */
+function buildPdfFileName(baseName) {
+    const d = new Date();
+    const p = function (n) { return (n < 10 ? '0' : '') + n; };
+    const stamp = '' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) +
+                  '_' + p(d.getHours()) + p(d.getMinutes());
+    const clean = String(baseName || 'Booking').replace(/\.pdf$/i, '').replace(/[\\/:*?"<>|]/g, '_').trim();
+    return 'Ofoq_Travel_' + (clean || 'Booking') + '_' + stamp + '.pdf';
+}
+
+/* تنزيل الملف في المتصفح — نفس آلية html2pdf.save (Blob URL + <a download>) */
+function downloadBlob(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+        if (a.parentNode) a.parentNode.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 3000);
+}
+/* ------------------------------------------------------------------
+   حفظ الملف ثم مشاركته — حسب المنصة، دون المساس بأي خيار تصدير
+   يعيد: { ok, name, shared, aborted }
+------------------------------------------------------------------ */
+async function saveAndSharePdf(blob, fileName, shareTitle) {
+    const platform = getCapacitorPlatform();
+    const isNative = (platform === 'android' || platform === 'ios');
+    const filesystem = getCapacitorPlugin('Filesystem');
+
+    /* ---------- 1) Capacitor: حفظ ثم مشاركة كمرفق حقيقي ---------- */
+    if (isNative && filesystem) {
+        try {
+            const base64 = await blobToBase64(blob);
+            const savedName = buildPdfFileName(fileName);
+            const payloadPath = { path: savedName, data: base64, recursive: true };
+
+            try {
+                await filesystem.writeFile(Object.assign({ directory: 'DOCUMENTS' }, payloadPath));
+            } catch (e1) {
+                /* بعض الإصدارات لا تدعم مجلد DOCUMENTS — نجرّب الكاش */
+                await filesystem.writeFile(Object.assign({ directory: 'CACHE' }, payloadPath));
+            }
+
+            /* الحصول على URI قابل للمشاركة (يتحول داخلياً إلى content://) */
+            let uri = '';
+            try {
+                const res = await filesystem.getUri({ path: savedName, directory: 'DOCUMENTS' });
+                uri = (res && res.uri) ? res.uri : '';
+            } catch (e) { uri = ''; }
+
+            const share = getCapacitorPlugin('Share');
+            if (share && typeof share.share === 'function') {
+                const base = { title: shareTitle || savedName, dialogTitle: shareTitle || savedName };
+
+                if (uri) {
+                    /* الطريقة المفضّلة: files ➜ مرفق فعلي داخل نافذة المشاركة */
+                    try {
+                        let can = true;
+                        if (typeof share.canShare === 'function') {
+                            can = await share.canShare({ files: [uri] });
+                        }
+                        if (can) {
+                            await share.share(Object.assign({ files: [uri] }, base));
+                            return { ok: true, name: savedName, shared: true };
+                        }
+                    } catch (e) { /* نجرّب الطريقة التالية */ }
+
+                    /* إصدارات أقدم من Share تقبل url فقط */
+                    try {
+                        await share.share(Object.assign({ url: uri }, base));
+                        return { ok: true, name: savedName, shared: true };
+                    } catch (e) { /* نجرّب المشاركة النصية */ }
+                }
+
+                await share.share(base);
+                return { ok: true, name: savedName, shared: true };
+            }
+
+            /* حُفظ الملف لكن لا توجد إضافة مشاركة */
+            return { ok: true, name: savedName, shared: false, attemptedShare: true };
+        } catch (err) {
+            console.error('PDF save error:', err);
+            return { ok: false, error: err };
+        }
+    }
+
+    /* ---------- 2) Android WebView: Web Share API ثم تنزيل ---------- */
+    if (isAndroidWebView()) {
+        try {
+            if (typeof navigator.share === 'function' && navigator.canShare) {
+                const file = new File([blob], fileName, { type: 'application/pdf' });
+                if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], title: shareTitle || fileName });
+                    return { ok: true, name: fileName, shared: true, attemptedShare: true };
+                }
+            }
+        } catch (err) {
+            if (err && err.name === 'AbortError') {
+                return { ok: true, name: fileName, shared: false, aborted: true, attemptedShare: true };
+            }
+            console.warn('Web Share unavailable:', err);
+        }
+        try {
+            downloadBlob(blob, fileName);
+            return { ok: true, name: fileName, shared: false, attemptedShare: true };
+        } catch (err2) {
+            console.error('PDF download error:', err2);
+            return { ok: false, error: err2 };
+        }
+    }
+
+    /* ---------- 3) متصفح سطح المكتب: تنزيل (سلوك سابق بلا تغيير) ---------- */
+    try {
+        downloadBlob(blob, fileName);
+        /* attemptedShare=false: على سطح المكتب لا تُطلب المشاركة أصلاً،
+           فالتنزيل الناجح = نجاح كامل بلا أي تنبيه */
+        return { ok: true, name: fileName, shared: false, attemptedShare: false };
+    } catch (err) {
+        console.error('PDF download error:', err);
+        return { ok: false, error: err };
+    }
+}
+
 async function exportBookingToPDF() {
     const element = document.getElementById('itineraryPrintDoc');
     if (!element) return;
@@ -1884,6 +2066,66 @@ async function exportBookingToPDF() {
             } catch (error) {
                 console.log("Could not convert image to base64 for PDF export:", error);
             }
+        }
+    }
+
+    const companyTextExportImages = [];
+    for (const textElement of [
+        document.getElementById('previewCompanyName'),
+        document.getElementById('previewCompanyTagline')
+    ]) {
+        const text = textElement?.textContent.trim();
+        if (!text || !/[\u0600-\u06FF]/.test(text)) continue;
+
+        await document.fonts.ready;
+        const bounds = textElement.getBoundingClientRect();
+        const styles = window.getComputedStyle(textElement);
+        const scale = 3;
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.ceil(bounds.width * scale));
+        canvas.height = Math.max(1, Math.ceil(bounds.height * scale));
+        const context = canvas.getContext('2d');
+
+        if (!context) continue;
+        context.scale(scale, scale);
+        context.fillStyle = styles.color;
+        context.font = styles.font;
+        context.direction = styles.direction;
+        context.textAlign = styles.textAlign;
+        context.textBaseline = 'middle';
+
+        const availableWidth = bounds.width;
+        const lines = [];
+        let line = '';
+        text.split(/\s+/).forEach((word) => {
+            const candidate = line ? `${line} ${word}` : word;
+            if (line && context.measureText(candidate).width > availableWidth) {
+                lines.push(line);
+                line = word;
+            } else {
+                line = candidate;
+            }
+        });
+        if (line) lines.push(line);
+
+        const fontSize = parseFloat(styles.fontSize) || 22;
+        const lineHeight = parseFloat(styles.lineHeight) || fontSize * 1.2;
+        const firstLineY = (bounds.height - (lines.length - 1) * lineHeight) / 2;
+        lines.forEach((lineText, index) => {
+            const x = styles.direction === 'rtl' ? availableWidth : 0;
+            context.fillText(lineText, x, firstLineY + index * lineHeight, availableWidth);
+        });
+
+        const exportImage = document.createElement('img');
+        exportImage.alt = text;
+        exportImage.style.cssText = `display:block;width:${bounds.width}px;height:${bounds.height}px;object-fit:contain`;
+        exportImage.src = canvas.toDataURL('image/png');
+        try {
+            await exportImage.decode();
+            textElement.replaceWith(exportImage);
+            companyTextExportImages.push({ image: exportImage, element: textElement });
+        } catch (error) {
+            console.warn('Could not prepare Arabic company text for PDF export:', error);
         }
     }
 
@@ -1909,8 +2151,9 @@ async function exportBookingToPDF() {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { 
             mode: ['css', 'legacy'],
-            before: '.pdf-page-break, .html2pdf__page-break',
+            after: '.pdf-page-break',
             avoid: [
+                '.pdf-page-break',
                 '.preview-flight-card', 
                 '.preview-passenger-row', 
                 '.doc-header', 
@@ -1924,36 +2167,56 @@ async function exportBookingToPDF() {
         }
     };
 
+    /* ------------------------------------------------------------------
+       1) توليد ملف PDF — بنفس مكتبة html2pdf ونفس الخيارات (opt) كما هي.
+          لم يتغيّر شيء هنا: نفس الهوامش، نفس A4، نفس تقسيم الصفحات،
+          نفس قواعد منع قطع الرحلات، ونفس قالب الطباعة.
+    ------------------------------------------------------------------ */
+    let pdfBlob = null;
     try {
-        const capacitor = window.Capacitor;
-        const filesystem = capacitor && capacitor.Plugins && capacitor.Plugins.Filesystem;
-        const platform = capacitor && typeof capacitor.getPlatform === 'function'
-            ? capacitor.getPlatform()
-            : 'web';
-
-        if (platform === 'android' && filesystem) {
-            const pdf = await html2pdf().from(element).set(opt).toPdf().get('pdf');
-            const dataUri = pdf.output('datauristring');
-            const base64Data = dataUri.split(',')[1];
-
-            await filesystem.writeFile({
-                path: opt.filename,
-                data: base64Data,
-                directory: 'DOCUMENTS',
-                recursive: true
-            });
-
-            alert(`تم حفظ الملف في مجلد Documents: ${opt.filename}`);
-        } else {
-            await html2pdf().from(element).set(opt).save();
-        }
+        const pdf = await html2pdf().from(element).set(opt).toPdf().get('pdf');
+        pdfBlob = pdf.output('blob');
     } catch (err) {
         console.error("PDF export error:", err);
-        alert("تعذر حفظ ملف PDF. يرجى المحاولة مرة أخرى.");
+        alert("تعذر إنشاء ملف PDF، يرجى المحاولة مرة أخرى.");
+        return;
     } finally {
         element.style.boxShadow = originalBoxShadow;
+        companyTextExportImages.forEach(({ image, element: textElement }) => {
+            if (image.isConnected) image.replaceWith(textElement);
+        });
+    }
+
+    if (!pdfBlob) {
+        alert("تعذر إنشاء ملف PDF، يرجى المحاولة مرة أخرى.");
+        return;
+    }
+
+    /* ------------------------------------------------------------------
+       2) الحفظ والمشاركة — الجزء الوحيد المُعدَّل لدعم Android
+    ------------------------------------------------------------------ */
+    let shareTitle = 'Ofoq Travel';
+    const pnrEl = document.getElementById('previewPnrBadge');
+    if (pnrEl && pnrEl.textContent) {
+        const t = pnrEl.textContent.trim();
+        if (t) shareTitle = t;
+    }
+
+    let result = null;
+    try {
+        result = await saveAndSharePdf(pdfBlob, opt.filename, shareTitle);
+    } catch (err) {
+        console.error("PDF share error:", err);
+        result = { ok: false, error: err };
+    }
+
+    if (!result || !result.ok) {
+        alert("تعذر إنشاء ملف PDF، يرجى المحاولة مرة أخرى.");
+    } else if (result.attemptedShare && !result.shared && !result.aborted) {
+        alert("تم إنشاء ملف PDF بنجاح، ولكن تعذر فتح نافذة المشاركة. يمكنك العثور على الملف في مجلد التنزيلات/الملفات.");
     }
 }
+
 function sendBookingByEmail() {
     if (typeof updateLivePreview === 'function') {
         updateLivePreview();

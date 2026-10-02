@@ -1378,13 +1378,18 @@ html[dir="ltr"] .pricing-box {
     }
 
     /* الفاصل الحقيقي المعتمد من المتصفحات عند الحاجة */
-    .force-page-break,
-    .pdf-page-break {
+    .force-page-break {
         break-before: page !important;
         page-break-before: always !important;
         display: block !important;
         margin-top: 0 !important;
         padding-top: 10mm !important;
+    }
+
+    .pdf-page-break {
+        break-inside: avoid !important;
+        break-after: page !important;
+        page-break-after: always !important;
     }
 
     .pdf-page-break::before {
@@ -1738,6 +1743,123 @@ html[dir="ltr"] #previewContactLine {
 .doc-meta-badge {
     position: relative;          /* أو absolute حسب تصميمه الحالي */
     top: 50px !important;        /* يزيحه للأسفل بمقدار معين دون أن يختفي أو يتداخل */
+}
+/* ==========================================================================
+   (س) ترويسة مستند التذكرة — عمودان ثابتان لا ينعكسان مع تغيّر اللغة
+   --------------------------------------------------------------------------
+   المطلوب:
+   1) العمود الأيمن = شعار الشركة + الاسم  (ثابت دائماً على اليمين)
+   2) العمود الأيسر = معلومات الاتصال + رمز الـ PNR (ثابت دائماً على اليسار)
+   3) ثبات الاتجاه: لا انعكاس للأعمدة عند التبديل بين العربية (rtl) والفرنسية/الإنجليزية (ltr)
+
+   الحل: تحويل .doc-header إلى شبكة (Grid) ترتيبها فيزيائي ثابت عبر
+        "direction: ltr" على الحاوية + تعيين عمود/سطر لكل عنصر صراحةً،
+        لذلك لا تعتمد التخطيطات على الوراثة العكسية للغة إطلاقاً.
+
+   كما أن هذا يُلغي الحِيَل（旧 الهوامش السالبة و top:50px ) التي كانت
+   تتداخل وتُزيح العناصر، فتختفي الحاجة إليها.
+   ========================================================================== */
+.doc-header {
+    display: grid !important;
+    /* الترتيب الفيزيائي الثابت: يمنع انعكاس الأعمدة عند تغيير اللغة */
+    direction: ltr !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: start;
+    justify-content: stretch;
+    column-gap: 18px;
+    row-gap: 6px;
+    /* position: relative محفوظ من القاعدة السابقة (لأجل العلامة المائية) */
+    margin-bottom: 16px;
+}
+
+/* ---------- العمود الأيمن (العمود الفيزيائي الثاني): الشعار والاسم ---------- */
+.doc-header > .doc-company-info {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    /* اتجاه القراءة يتبع اللغة، لكن المكان يبقى يميناً دائماً */
+    direction: rtl;
+    justify-content: flex-start;
+    text-align: right;
+}
+
+.doc-header > .doc-company-info > div:last-child {
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+/* ---------- العمود الأيسر (العمود الفيزيائي الأول): معلومات الاتصال ----------
+   المُحدِّدات هنا أقوى من "html[dir=...] #previewContactLine" القديمة
+   حتى لا تُعيد محاذاة اليمين/اليسار القديمة سريانها مع تغيّر اللغة. */
+html body .doc-header > #previewContactLine {
+    grid-column: 1;
+    grid-row: 1;
+    /* إلغاء التموضع المطلق القديم (وهو سبب التداخل والهامش السالب) */
+    position: static !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    margin: 0 !important;
+    z-index: auto !important;
+    transform: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start;
+    gap: 4px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    /* محتوى الاتصال لاتيني دائماً => اتجاه ثابت ومحاذاة يسار */
+    direction: ltr !important;
+    text-align: left !important;
+    min-width: 0;
+}
+
+/* ---------- العمود الأيسر: رمز الحجز PNR ---------- */
+html body .doc-header > .doc-meta-badge {
+    grid-column: 1;
+    grid-row: 2;
+    /* إلغاء إزاحة top:50px التي كانت تزيح شارة الـ PNR لأسفل */
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    text-align: left !important;
+    min-width: 0;
+}
+
+/* ---------- ترويسة الصفحة الثانية (تابع جدول الرحلات): نفس المنطق ---------- */
+.page-2-header {
+    display: flex !important;
+    direction: ltr !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 10px;
+    /* الشريط اللوني يبقى على اليمين دائماً مثل العمود الأيمن */
+    border-right: 4px solid var(--sky-blue);
+}
+
+.page-2-header > .page-2-company {
+    order: 2;
+    direction: rtl;
+    text-align: right;
+    min-width: 0;
+}
+
+.page-2-header > .page-2-badge {
+    order: 1;
+    text-align: left;
+    min-width: 0;
+}
+
+html[dir="ltr"] .page-2-header {
+    border-right: 4px solid var(--sky-blue);
+    border-left: 1px solid #e2e8f0;
 }
 @media print {
     /* السماح بطباعة الصور والخلفيات */
@@ -2403,7 +2525,17 @@ div:has(> #previewTaxFees) {
         line-height: 1.5;
     }
 
-    /* إعادة خط التواصل إلى التدفق الطبيعي (كان absolute بهامش سالب يسبب تداخلاً) */
+    /* العمودان يبقيان ثابتين (يمين=شركة، يسار=معلومات) على الجوال أيضاً،
+       مع تصغير المسافات والخطوط فقط — لا انعكاس ولا دمج. */
+    html[dir] body .preview-pane .itinerary-preview-document .doc-header {
+        column-gap: 10px;
+        row-gap: 4px;
+    }
+
+    html[dir] body .preview-pane .itinerary-preview-document .doc-header > .doc-company-info {
+        gap: 8px;
+    }
+
     html[dir] body .preview-pane .itinerary-preview-document #previewContactLine {
         position: static !important;
         top: auto !important;
@@ -2413,20 +2545,22 @@ div:has(> #previewTaxFees) {
         margin: 0 !important;
         z-index: auto !important;
         transform: none !important;
-        width: 100%;
-        flex-direction: row !important;
-        flex-wrap: wrap;
-        align-items: center !important;
+        width: auto;
+        flex-direction: column !important;
+        flex-wrap: nowrap;
+        align-items: flex-start !important;
         justify-content: flex-start;
-        gap: 6px 14px !important;
+        gap: 3px !important;
         direction: ltr !important;
-        font-size: 10px;
+        text-align: left !important;
+        font-size: 9px;
         padding: 0 !important;
         background: transparent !important;
     }
 
     html[dir] body .preview-pane .itinerary-preview-document #previewContactLine span {
-        font-size: 10px;
+        font-size: 9px;
+        gap: 4px !important;
         max-width: 100%;
         min-width: 0;
         overflow-wrap: anywhere;
@@ -2435,6 +2569,7 @@ div:has(> #previewTaxFees) {
     html[dir] body .preview-pane .itinerary-preview-document .doc-meta-badge {
         position: static !important;
         top: auto !important;
+        text-align: left !important;
     }
 
     html body .preview-pane .itinerary-preview-document .doc-pnr-display {
@@ -2626,5 +2761,122 @@ div:has(> #previewTaxFees) {
     .table-responsive,
     .sidebar-nav {
         -webkit-overflow-scrolling: touch;
+    }
+}
+/* ==========================================================================
+   (م) زر "إرسال عبر الإيميل" — تحسين شكل فقط بدون تغيير أي خاصية أو وظيفة
+   ملاحظات العزل:
+   - الزر يقع داخل .preview-actions وهي NOT جزء من #itineraryPrintDoc،
+     لذلك لا يمكن أن يظهر أبداً داخل نسخة html2pdf.
+   - كما أن @media print يُخفي .preview-actions بـ display:none !important.
+   - وكل القواعد هنا داخل @media screen لضمان عدم تطبيقها عند الطباعة.
+   - لم يتم المساس بـ: onclick، الـ id، النص، الأيقونة، أو حجم/ارتفاع الزر.
+   ========================================================================== */
+@media screen {
+
+    /* ملاحظة: هذه القواعد تغيّر اللون والظل والحركة فقط.
+       لا تعديل على font-weight أو border أو padding أو الأبعاد
+       حتى يبقى حجم الزر وموضعه كما هو تماماً (يرث font-weight من .btn). */
+
+    .btn-mail {
+        background-image: linear-gradient(135deg, var(--aviation-blue) 0%, var(--sky-blue) 100%);
+        background-color: var(--aviation-blue);
+        color: var(--white);
+        box-shadow: 0 2px 6px rgba(30, 58, 138, 0.22);
+    }
+
+    .btn-mail i {
+        flex: 0 0 auto;
+        transition: transform 0.25s ease;
+    }
+
+    .btn-mail:hover {
+        background-image: linear-gradient(135deg, var(--navy) 0%, var(--aviation-blue) 100%);
+        background-color: var(--navy);
+        color: var(--white);
+        box-shadow: 0 6px 16px rgba(10, 25, 47, 0.28);
+        transform: translateY(-1px);
+    }
+
+    .btn-mail:hover i {
+        transform: translateY(-1px) scale(1.08);
+    }
+
+    .btn-mail:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(30, 58, 138, 0.22);
+    }
+
+    /* حالة التركيز الواضحة للوصولية بلوحة المفاتيح */
+    .btn-mail:focus-visible {
+        outline: 3px solid rgba(59, 130, 246, 0.5);
+        outline-offset: 2px;
+    }
+
+    /* ===================== زر الطباعة (تحسين مظهر فقط) =====================
+       لا تغيير في: id، type، title، الأيقونة، أو الأبعاد (يرثها من .btn-icon). */
+    .btn-print {
+        background-image: linear-gradient(135deg, var(--navy) 0%, var(--aviation-blue) 100%);
+        background-color: var(--navy);
+        color: var(--white);
+        border-color: transparent;
+        box-shadow: 0 2px 6px rgba(10, 25, 47, 0.24);
+    }
+
+    .btn-print i {
+        color: var(--white);
+        transition: transform 0.25s ease;
+    }
+
+    .btn-print:hover {
+        background-image: linear-gradient(135deg, #000000 0%, var(--navy) 100%);
+        background-color: #000000;
+        color: var(--white);
+        border-color: transparent;
+        box-shadow: 0 6px 14px rgba(10, 25, 47, 0.32);
+    }
+
+    .btn-print:hover i { transform: translateY(-1px) scale(1.08); }
+
+    .btn-print:active {
+        box-shadow: 0 2px 6px rgba(10, 25, 47, 0.24);
+    }
+
+    .btn-print:focus-visible {
+        outline: 3px solid rgba(59, 130, 246, 0.5);
+        outline-offset: 2px;
+    }
+
+    /* ===================== زر تصدير PDF (تحسين مظهر فقط) ===================== */
+    .btn-pdf {
+        background-image: linear-gradient(135deg, #B91C1C 0%, #EF4444 100%);
+        background-color: #B91C1C;
+        color: var(--white);
+        border-color: transparent;
+        box-shadow: 0 2px 6px rgba(185, 28, 28, 0.26);
+    }
+
+    .btn-pdf i {
+        color: var(--white);
+        transition: transform 0.25s ease;
+    }
+
+    .btn-pdf:hover {
+        background-image: linear-gradient(135deg, #7F1D1D 0%, #DC2626 100%);
+        background-color: #7F1D1D;
+        color: var(--white);
+        border-color: transparent;
+        box-shadow: 0 6px 14px rgba(127, 29, 29, 0.34);
+    }
+
+    .btn-pdf:hover i { transform: translateY(-1px) scale(1.08); }
+
+    .btn-pdf:active {
+        box-shadow: 0 2px 6px rgba(185, 28, 28, 0.26);
+    }
+
+    .btn-pdf:focus-visible {
+        outline: 3px solid rgba(239, 68, 68, 0.5);
+        outline-offset: 2px;
     }
 }
