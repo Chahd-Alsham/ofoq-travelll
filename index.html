@@ -3,7 +3,7 @@
 <html lang="ar" dir="rtl" data-lang="ar">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>أفق للطيران — Ofoq Travel | نظام الحجوزات</title>
     <link rel="stylesheet" href="style.css">
     <!-- Google Fonts: Cairo & Inter -->
@@ -32,11 +32,11 @@
             </div>
 
             <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-target="section-dashboard" data-i18n="nav_dashboard">
+                <a href="#" class="nav-item" data-target="section-dashboard" data-i18n="nav_dashboard">
                     <i class="fa-solid fa-house"></i>
                     <span>الرئيسية</span>
                 </a>
-                <a href="#" class="nav-item" data-target="section-new-booking" data-i18n="nav_new_booking">
+                <a href="#" class="nav-item active" data-target="section-new-booking" data-i18n="nav_new_booking">
                     <i class="fa-solid fa-plus-circle"></i>
                     <span>حجز جديد</span>
                 </a>
@@ -70,10 +70,11 @@
             <header class="topbar">
                 <div class="topbar-left">
                     <button class="mobile-toggle-btn" id="mobileToggleBtn"><i class="fa-solid fa-bars"></i></button>
-                    <div class="search-global-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="globalSearchInput" placeholder="البحث برقم PNR، اسم المسافر، أو التذكرة..." data-i18n-placeholder="search_placeholder">
-                    </div>
+                </div>
+
+                <div class="search-global-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="globalSearchInput" placeholder="البحث برقم PNR، اسم المسافر، أو التذكرة..." data-i18n-placeholder="search_placeholder">
                 </div>
 
                 <div class="topbar-right">
@@ -110,7 +111,7 @@
             <div class="content-body">
 
                 <!-- 1. Dashboard Section -->
-                <section id="section-dashboard" class="app-section active">
+                <section id="section-dashboard" class="app-section">
                     <div class="welcome-banner">
                         <div class="banner-text">
                             <h1 data-i18n="welcome_title">مرحباً بك في نظام أفق للطيران</h1>
@@ -173,7 +174,7 @@
                 </section>
 
                 <!-- 2. New / Edit Booking Section (Split View Work Area & Live Preview) -->
-                <section id="section-new-booking" class="app-section">
+                <section id="section-new-booking" class="app-section active">
                     <div class="builder-workspace">
                         <!-- Left/Work Area: Forms -->
                         <div class="work-area-pane">

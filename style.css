@@ -199,16 +199,22 @@ html[dir="ltr"] .main-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     padding: 0 30px;
+    padding-right: max(30px, env(safe-area-inset-right));
+    padding-left: max(30px, env(safe-area-inset-left));
+    padding-top: env(safe-area-inset-top);
     position: sticky;
     top: 0;
     z-index: 90;
+    min-width: 0;
 }
 
 .topbar-left, .topbar-right {
     display: flex;
     align-items: center;
     gap: 16px;
+    min-width: 0;
 }
 
 .mobile-toggle-btn {
@@ -227,6 +233,9 @@ html[dir="ltr"] .main-content {
     border-radius: 8px;
     padding: 8px 14px;
     width: 320px;
+    max-width: 100%;
+    min-width: 0;
+    flex-shrink: 1;
     gap: 10px;
 }
 
@@ -271,7 +280,10 @@ html[dir="ltr"] .main-content {
 /* Content Sections */
 .content-body {
     padding: 30px;
+    padding-right: max(30px, env(safe-area-inset-right));
+    padding-left: max(30px, env(safe-area-inset-left));
     flex: 1;
+    min-width: 0;
 }
 
 .app-section {
@@ -375,6 +387,30 @@ html[dir="ltr"] .main-content {
 
 .table-responsive {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+}
+
+/* حقل البحث الصغير في سجل الحجوزات (مستخدم في index.html) */
+.search-box-sm {
+    display: flex;
+    align-items: center;
+    background-color: var(--gray-100);
+    border-radius: 8px;
+    padding: 6px 12px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.search-box-sm input {
+    border: none;
+    background: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--gray-800);
+    width: 100%;
+    min-width: 0;
 }
 
 .data-table {
@@ -685,6 +721,7 @@ html[dir="ltr"] .data-table {
     z-index: 0;
     pointer-events: none;
     letter-spacing: 10px;
+    white-space: nowrap;
 }
 
 .doc-header {
@@ -847,12 +884,29 @@ html[dir="ltr"] .doc-meta-badge {
 
 html[dir="ltr"] .preview-flight-card {
     border-right: 1px solid var(--gray-200);
-    border-left: 4px solid var(--sky-blue);
 }
 
 .preview-flight-card.type-outbound { border-color: var(--sky-blue); }
 .preview-flight-card.type-transit { border-color: var(--bassel); }
 .preview-flight-card.type-return { border-color: var(--gold); }
+
+.preview-flight-card.type-outbound {
+    background-color: #f5fbff;
+}
+
+.preview-flight-card.type-transit {
+    background-color: #fff8fc;
+}
+
+.preview-flight-card.type-return {
+    background-color: #fffdf5;
+}
+
+.preview-flight-card.type-outbound .flight-route-grid,
+.preview-flight-card.type-transit .flight-route-grid,
+.preview-flight-card.type-return .flight-route-grid {
+    background-color: transparent;
+}
 
 /* حماية جميع عناصر التذكرة من الانقسام بين الصفحات */
 .itinerary-preview-document .doc-header,
@@ -987,16 +1041,34 @@ html[dir="ltr"] .flight-endpoint.dest {
 }
 
 .flight-time-date {
-    font-size: 10px;
-    color: var(--aviation-blue);
     margin-top: 2px;
 }
 
+.flight-time,
+.flight-date {
+    display: block;
+}
+
+.flight-time {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.flight-date {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
 .flight-middle-graphic {
+    flex: 0 0 88px;
+    align-self: stretch;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 2px;
     color: var(--gray-400);
     font-size: 10px;
@@ -1005,6 +1077,22 @@ html[dir="ltr"] .flight-endpoint.dest {
 .flight-middle-graphic i {
     font-size: 14px;
     color: var(--sky-blue);
+}
+
+.flight-transit-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.flight-transit-icon i {
+    font-size: 12px !important;
+    position: static !important;
+    top: auto !important;
+}
+
+.flight-transit-icon .fa-arrows-rotate {
+    font-size: 10px !important;
 }
 
 .flight-details-footer {
@@ -1202,6 +1290,10 @@ html[dir="ltr"] .pricing-box {
     opacity: 0;
     pointer-events: none;
     transition: var(--transition);
+    padding: 16px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    overflow-y: auto;
 }
 
 .modal-overlay.active {
@@ -1214,6 +1306,9 @@ html[dir="ltr"] .pricing-box {
     border-radius: 12px;
     width: 100%;
     max-width: 450px;
+    max-height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 24px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
@@ -1268,6 +1363,458 @@ html[dir="ltr"] .pricing-box {
     }
     .search-global-box {
         width: 180px;
+    }
+}
+
+/* ==========================================================
+   حمايات عامة: منع أي محتوى من الخروج عن عرض الشاشة
+   (تُضاف في نهاية الملف حتى تكون لها أولوية على باقي القواعد)
+   ========================================================== */
+
+/* منع التمرير الأفقي غير الضروري على مستوى الصفحة */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.app-container,
+.main-content,
+.content-body {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* منع أي عنصر من الفرار أفقياً (جداول، صور، حقول) */
+img, svg, video, canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+/* حقول الإدخال والقوائم: لا تتجاوز عرض الأب */
+.form-control,
+select.form-control,
+input, select, textarea {
+    max-width: 100%;
+}
+
+/* النصوص الطويلة: تلتف بدل أن تُقص */
+.main-content, .content-body, .work-area-pane, .preview-pane,
+.form-section-card, .dynamic-item-card, .section-card-full,
+.recent-bookings-preview, .itinerary-preview-document {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* ==========================================================
+   نظام التجاوب المتدرّج (Responsive System)
+   يعدّل العرض والمسافات فقط — لا يغيّر الألوان ولا الخطوط
+   ولا شكل البطاقات ولا ترتيب الوظائف.
+   ========================================================== */
+
+/* ---- 1) لابتوب صغير وشاشات متوسطة (≤ 1280px) ---- */
+@media (max-width: 1280px) {
+    .content-body {
+        padding: 24px;
+        padding-right: max(24px, env(safe-area-inset-right));
+        padding-left: max(24px, env(safe-area-inset-left));
+    }
+
+    .topbar {
+        padding: 0 24px;
+        padding-right: max(24px, env(safe-area-inset-right));
+        padding-left: max(24px, env(safe-area-inset-left));
+    }
+
+    .search-global-box {
+        width: 260px;
+    }
+
+    .builder-workspace {
+        gap: 20px;
+    }
+}
+
+/* ---- 2) تابلت (≤ 1024px) ---- */
+@media (max-width: 1024px) {
+    .content-body {
+        padding: 20px;
+        padding-right: max(20px, env(safe-area-inset-right));
+        padding-left: max(20px, env(safe-area-inset-left));
+    }
+
+    .topbar {
+        padding: 0 20px;
+        padding-right: max(20px, env(safe-area-inset-right));
+        padding-left: max(20px, env(safe-area-inset-left));
+    }
+
+    /* شبكات مرنة: لا تتجاوز عرض الشاشة أبداً */
+    .dashboard-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+        gap: 16px;
+    }
+
+    .airlines-grid {
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+        gap: 12px;
+    }
+
+    /* مستند التذكرة: يتجاوز حد الـ A4 ليأخذ عرض الشاشة */
+    .itinerary-preview-document {
+        max-width: 100%;
+        padding: 8mm 10mm;
+    }
+
+    /* شبكة معلومات التذكرة: 4 أعمدة -> عمودان */
+    .doc-info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ---- 3) تابلت عمودي (≤ 820px) ---- */
+@media (max-width: 820px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* الحقول التي كانت بعرض عمودين تعود لعمود واحد */
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+
+    .work-area-pane,
+    .preview-pane,
+    .section-card-full,
+    .recent-bookings-preview,
+    .form-section-card {
+        padding: 16px;
+    }
+
+    .welcome-banner {
+        padding: 22px;
+    }
+}
+
+/* ---- 4) هاتف (≤ 768px) — نقطة التوقف الرئيسية ---- */
+@media (max-width: 768px) {
+    .content-body {
+        padding: 16px;
+        padding-right: max(16px, env(safe-area-inset-right));
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+
+    .topbar {
+        height: auto;
+        min-height: 56px;
+        padding: 8px 12px;
+        padding-right: max(12px, env(safe-area-inset-right));
+        padding-left: max(12px, env(safe-area-inset-left));
+        padding-top: max(8px, env(safe-area-inset-top));
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+
+    /* صف أول: زر القائمة + القوائم + شارة الشركة | صف ثانٍ: البحث بعرض كامل */
+    .topbar-left,
+    .topbar-right {
+        gap: 8px;
+    }
+
+    .topbar-left {
+        flex: 0 0 auto;
+        flex-wrap: nowrap;
+    }
+
+    .topbar-right {
+        flex: 1 1 auto;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        min-width: 0;
+    }
+
+    .search-global-box {
+        flex: 1 1 100%;
+        order: 3;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .user-profile-badge {
+        font-size: 13px;
+        padding: 5px 10px;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* القوائم المنسدلة لا تتجاوز عرض الصف */
+    .topbar-select {
+        max-width: 110px;
+        min-width: 0;
+    }
+
+    .dropdown-container {
+        min-width: 0;
+    }
+
+    .banner-text h1 {
+        font-size: 20px;
+    }
+
+    .section-header-inline h2,
+    .section-header-inline h3 {
+        font-size: 16px;
+    }
+
+    /* صفوف العناوين تلتف بدل أن تتداخل مع الأزرار */
+    .pane-header,
+    .preview-pane-header,
+    .section-header-inline {
+        flex-wrap: wrap;
+        row-gap: 10px;
+    }
+
+    .pane-actions,
+    .preview-actions,
+    .form-actions-bar {
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .doc-info-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 8px;
+    }
+
+    /* عناصر الرحلة الجانبية تنتقل لأسفل بدل أن تتداخل */
+    .flight-details-footer,
+    .transit-waiting-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .price-row {
+        gap: 10px;
+    }
+
+    .flight-middle-graphic {
+        flex: 0 0 56px;
+    }
+
+    .preview-passenger-row {
+        flex-wrap: wrap;
+        row-gap: 4px;
+    }
+
+    /* تصغير العلامة المائية حتى لا تتجاوز حدود المستند */
+    .doc-watermark {
+        font-size: 72px;
+        letter-spacing: 6px;
+    }
+}
+
+/* ---- 5) هاتف صغير (≤ 480px) — Android 360 / iPhone SE ---- */
+@media (max-width: 480px) {
+    .content-body {
+        padding: 12px;
+        padding-right: max(12px, env(safe-area-inset-right));
+        padding-left: max(12px, env(safe-area-inset-left));
+    }
+
+    .topbar {
+        padding: 6px 12px;
+        padding-right: max(12px, env(safe-area-inset-right));
+        padding-left: max(12px, env(safe-area-inset-left));
+    }
+
+    .work-area-pane,
+    .preview-pane,
+    .section-card-full,
+    .recent-bookings-preview,
+    .form-section-card,
+    .dynamic-item-card {
+        padding: 12px;
+    }
+
+    .welcome-banner {
+        padding: 18px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .banner-text h1 {
+        font-size: 18px;
+    }
+
+    .banner-action,
+    .banner-action .btn {
+        width: 100%;
+    }
+
+    /* شبكة واحدة على الشاشات الصغيرة جداً */
+    .dashboard-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .airlines-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .doc-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* خلايا الجداول أصغر والنصوص تلتف بدل القص */
+    .data-table th,
+    .data-table td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .modal-box {
+        padding: 18px;
+    }
+
+    .modal-header h3 {
+        font-size: 15px;
+    }
+
+    .flight-middle-graphic {
+        flex: 0 0 42px;
+        font-size: 9px;
+    }
+
+    /* العلامة المائية أصغر على الشاشات الصغيرة جداً */
+    .doc-watermark {
+        font-size: 52px;
+        letter-spacing: 4px;
+    }
+
+    .flight-middle-graphic i {
+        font-size: 12px;
+    }
+
+    /* أزرار بملء العرض لتسهيل اللمس */
+    .pane-actions .btn,
+    .form-actions-bar .btn,
+    .preview-actions .btn:not(.btn-icon) {
+        flex: 1 1 auto;
+    }
+}
+
+/* ---- 6) وضع الهاتف الأفقي (ارتفاع صغير) ---- */
+@media (max-width: 900px) and (orientation: landscape) {
+    .topbar {
+        height: auto;
+        min-height: 52px;
+        flex-wrap: wrap;
+        row-gap: 6px;
+    }
+
+    /* إلغاء الالتصاق والحد الأقصى للارتفاع حتى لا يُقص المحتوى */
+    .preview-pane {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    .content-body {
+        padding-top: 12px;
+    }
+}
+
+/* ---- 7) توافق أحجام الخط والأزرار بين المنصات ---- */
+
+/* iOS / Safari: الحقول بأقل من 16px تُسبب تكبيراً تلقائياً عند التركيز،
+   لذا نرفعها لـ 16px على الأجهزة اللمسية فقط (لا يؤثر على سطح المكتب) */
+@supports (-webkit-touch-callout: none) {
+    @media (pointer: coarse) {
+        .form-control,
+        .topbar-select,
+        input,
+        select,
+        textarea {
+            font-size: 16px;
+        }
+    }
+}
+
+/* إزالة تأثير النقر الخاطف على الأزرار (يمنع وميضاً على iOS/Android) */
+.btn,
+.btn-icon,
+.btn-text,
+.nav-item,
+.modal-close-btn,
+.mobile-toggle-btn,
+.mobile-close-btn {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* مساحة لمس مناسبة ( Hammer / أيقونات 40px كحد أدنى ) */
+@media (pointer: coarse) {
+    .btn,
+    .btn-icon,
+    .modal-close-btn {
+        min-height: 40px;
+    }
+
+    .btn-icon {
+        min-width: 40px;
+    }
+
+    .nav-item {
+        padding-top: 14px;
+        padding-bottom: 14px;
+    }
+}
+
+/* عناصر الـ Sidebar: احترام المناطق الآمنة على iPhone */
+.sidebar {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ضمان فتح/إغلاق شريط التنقل على الهاتف (بعد كل القواعد الأخرى)
+   نكرر القاعدة هنا لضمان أولويتها في كلا اتجاهي RTL و LTR */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(100%);
+    }
+
+    html[dir="ltr"] .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.mobile-open,
+    html[dir="ltr"] .sidebar.mobile-open,
+    html[dir="rtl"] .sidebar.mobile-open {
+        transform: translateX(0);
+    }
+}
+
+/* في وضع الهاتف: منع تمرير المحتوى خلف الشريط الجانبي المفتوح */
+@media (max-width: 992px) {
+    body.sidebar-open {
+        overflow: hidden;
+    }
+}
+
+/* ---- 8) الحفاظ على سلوك العرض في كلا اتجاهي RTL و LTR ---- */
+html[dir="rtl"] .main-content,
+html[dir="ltr"] .main-content {
+    min-width: 0;
+}
+
+/* في الوضع الأفقي القصير: ضمان عدم ظهور شريط تمرير أفقي */
+@media (max-height: 480px) and (orientation: landscape) {
+    html, body {
+        overflow-x: hidden;
     }
 }
 
@@ -1448,9 +1995,9 @@ html[dir="ltr"] .pricing-box {
 /* 3. تنسيق أوقات الرحلة (Departure & Arrival Times) */
 .itinerary-preview-document .preview-flight-card .flight-time,
 .itinerary-preview-document .preview-flight-card [class*="time"] {
-    font-size: 14px !important;
-    color: #2563eb !important;
-    font-weight: 600 !important;
+    font-size: 20px !important;
+    color: #1e293b !important;
+    font-weight: 700 !important;
 }
 
 /* 4. تنسيق تواريخ الرحلة (Dates) */
@@ -1458,6 +2005,7 @@ html[dir="ltr"] .pricing-box {
 .itinerary-preview-document .preview-flight-card [class*="date"] {
     font-size: 15px !important;
     color: #131e7e !important;
+    font-weight: 500 !important;
 }
 
 /* 5. تنسيق معلومات الأمتعة (Baggage - Checked & Cabin) */
@@ -1499,6 +2047,12 @@ html[dir="ltr"] .pricing-box {
 .itinerary-preview-document .preview-flight-card .flight-route-grid > div:nth-child(2) {
     flex: 0 0 6% !important;
     text-align: center !important;
+}
+
+.itinerary-preview-document .preview-flight-card.type-outbound .flight-route-grid,
+.itinerary-preview-document .preview-flight-card.type-transit .flight-route-grid,
+.itinerary-preview-document .preview-flight-card.type-return .flight-route-grid {
+    background-color: transparent !important;
 }
 
 /* 3. تثبيت جهة الوصول على اليمين تماماً ومنع تأثرها بطول اسم المطار */
@@ -1717,11 +2271,27 @@ html[dir="ltr"] #previewContactLine {
     margin-bottom: 25px !important;
 }
 /* توسيط أيقونة الطائرة بدقة */
-.itinerary-preview-document .flight-middle-graphic i.fa-plane {
+.itinerary-preview-document .flight-middle-graphic i {
     font-size: 18px !important;
     color: #0284c7 !important;
-    position: relative !important;
-    top: 47px !important; /* قم بتعديل هذا الرقم (زيادة أو نقصاناً) لإنزال الطائرة للمستوى المطلوب تماماً */
+    position: static !important;
+    top: auto !important;
+}
+
+.itinerary-preview-document .flight-middle-graphic .flight-transit-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+.itinerary-preview-document .flight-middle-graphic .flight-transit-icon i {
+    font-size: 12px !important;
+    position: static !important;
+    top: auto !important;
+}
+
+.itinerary-preview-document .flight-middle-graphic .flight-transit-icon .fa-arrows-rotate {
+    font-size: 10px !important;
 }
 /* إخفاء سطر السعر الأساسي والضرائب */
 tr:has(#previewBaseFare),
