@@ -380,21 +380,12 @@ async function initializeDatabase() {
     }
 
     if (typeof require === 'function') {
-        // في عملية العرض (renderer) لا تتوفر app، بل في العملية الرئيسية فقط.
-        // لذلك نتحقق من وجودها قبل الاستخدام، ونكمل للبديل (IndexedDB) إن لم تتوفر.
-        try {
-            const { app } = require('electron');
-            const { DatabaseSync } = require('node:sqlite');
-            const path = require('path');
-            if (app && typeof app.getPath === 'function' && DatabaseSync) {
-                electronDatabase = new DatabaseSync(path.join(app.getPath('userData'), 'ofoq-travel.sqlite'));
-                electronDatabase.exec('CREATE TABLE IF NOT EXISTS app_state (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL)');
-                return;
-            }
-        } catch (e) {
-            // فشلت تهيئة قاعدة بيانات Electron — نكمل للبديل بالأسفل
-            console.warn('Electron SQLite غير متاح في هذه العملية، سيتم استخدام IndexedDB.');
-        }
+        const { app } = require('electron');
+        const { DatabaseSync } = require('node:sqlite');
+        const path = require('path');
+        electronDatabase = new DatabaseSync(path.join(app.getPath('userData'), 'ofoq-travel.sqlite'));
+        electronDatabase.exec('CREATE TABLE IF NOT EXISTS app_state (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL)');
+        return;
     }
 
     if (window.indexedDB) {
@@ -607,13 +598,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Navigation & Sidebar
-
-// إغلاق الشريط الجانبي للهاتف وإلغاء قفل تمرير الصفحة
-function closeMobileSidebar() {
-    const sb = document.getElementById('sidebar');
-    if (sb) sb.classList.remove('mobile-open');
-    document.body.classList.remove('sidebar-open');
-}
 function initEventListeners() {
     // Sidebar switching
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
@@ -626,23 +610,16 @@ function initEventListeners() {
             item.classList.add('active');
 
             // Close mobile sidebar if open
-            closeMobileSidebar();
+            document.getElementById('sidebar').classList.remove('mobile-open');
         });
     });
 
     document.getElementById('mobileToggleBtn').addEventListener('click', () => {
         document.getElementById('sidebar').classList.add('mobile-open');
-        // منع تمرير المحتوى خلف الشريط الجانبي المفتوح على الهاتف
-        document.body.classList.add('sidebar-open');
     });
 
     document.getElementById('mobileCloseBtn').addEventListener('click', () => {
-        closeMobileSidebar();
-    });
-
-    // إغلاق الشريط الجانبي تلقائياً عند العودة لعرض سطح المكتب أو تدوير الجهاز
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 992) closeMobileSidebar();
+        document.getElementById('sidebar').classList.remove('mobile-open');
     });
 
     // Language Selector
@@ -778,6 +755,11 @@ function initLanguageAndDirection(lang) {
             el.placeholder = dict[key];
         }
     });
+
+    // تحديث تسميات خلايا الجداول لتتبع اللغة الجديدة (واجهة الشاشة فقط)
+    if (typeof syncTableCellLabels === 'function') {
+        syncTableCellLabels();
+    }
 }
 
 // Passenger Management
@@ -877,14 +859,6 @@ function renderPassengersForm() {
             updateLivePreview();
         });
     });
-}
-
-// تنسيق رقم التيرمينال للعرض في التذكرة فقط: "T1" أو "1" => "T1" بدون تكرار حرف T
-// ملاحظة: هذا لا يمنع الكتابة اليدوية - الحقل يبقى قابلاً للتحرير
-function formatTerminal(value) {
-    const t = String(value || '').trim().toUpperCase();
-    if (!t) return '';
-    return /^T/.test(t) ? t : `T${t}`;
 }
 
 // Flight Management
@@ -1224,9 +1198,8 @@ containerElem.querySelectorAll('.f-type').forEach(el => {
 });
 
 // Simple binding helper for text inputs
-// ملاحظة: نستخدم containerElem لتفادي خطأ "container is not defined" عند تنفيذ السكربت
 const bindInput = (selector, key) => {
-    containerElem.querySelectorAll(selector).forEach(el => {
+    container.querySelectorAll(selector).forEach(el => {
         el.addEventListener('input', (e) => {
             workingFlights[e.target.dataset.index][key] = e.target.value;
             updateLivePreview();
@@ -1266,6 +1239,21 @@ function calculateDuration(depDate, depTime, arrDate, arrTime) {
     } catch (e) {
         return "--";
     }
+}
+
+// توحيد صيغة رقم الترمinals في التذكرة
+// المشكلة: الحقل يحمل placeholder = "T1" والبيانات الافتراضية "T1"/"T2"،
+// بينما الكود كان يضيف الحرف T بنفسه ← فكان يظهر "TT1".
+// الحل: نزع أي T في بداية المدخل ثم إضافة T واحدة فقط، وبذلك:
+//   "1" → "T1" ، "T1" → "T1" ، "t2" → "T2" ، "T 3" → "T3" ، فارغ → ""
+function formatTerminal(value) {
+    if (value === null || value === undefined) return "";
+    const raw = String(value).replace(/\s+/g, " ").trim();
+    if (!raw) return "";
+    // إزالة أي حرف T (أو t) متكرر في البداية إن وُجد، مع تجاهل المسافة بعدها
+    const cleaned = raw.replace(/^t+\s*/i, "").trim();
+    if (!cleaned) return "";
+    return "T" + cleaned;
 }
 
 // Update Live Preview (Requirement 19-23)
@@ -1366,6 +1354,10 @@ function updateLivePreview() {
 
             const duration = calculateDuration(f.depDate, f.depTime, f.arrDate, f.arrTime);
 
+            // توحيد صيغة الترمinals (T واحد فقط مهما كانت صيغة الإدخال)
+            const depTerminalText = formatTerminal(f.depTerminal);
+            const arrTerminalText = formatTerminal(f.arrTerminal);
+
             let typeClass = 'type-outbound';
             let badgeClass = 'type-outbound-badge';
             let typeLabel = '✈️ Outbound';
@@ -1400,7 +1392,7 @@ function updateLivePreview() {
                 <div class="flight-route-grid">
                     <div class="flight-endpoint">
                         <span class="flight-city-name">${f.depCity || 'DEP'}</span>
-                        <span class="flight-airport-code">${f.depAirport || 'ALG'}${formatTerminal(f.depTerminal) ? ` (${formatTerminal(f.depTerminal)})` : ''}</span>
+                        <span class="flight-airport-code">${f.depAirport || 'ALG'}${depTerminalText ? ` (${depTerminalText})` : ''}</span>
                         <span class="flight-time-date">
                             <span class="flight-time">${f.depTime || '--:--'}</span>
                             <span class="flight-date">${f.depDate || '----/--/--'}</span>
@@ -1411,7 +1403,7 @@ function updateLivePreview() {
                     </div>
                     <div class="flight-endpoint dest">
                         <span class="flight-city-name">${f.arrCity || 'ARR'}</span>
-                        <span class="flight-airport-code">${f.arrAirport || 'IST'}${formatTerminal(f.arrTerminal) ? ` (${formatTerminal(f.arrTerminal)})` : ''}</span>
+                        <span class="flight-airport-code">${f.arrAirport || 'IST'}${arrTerminalText ? ` (${arrTerminalText})` : ''}</span>
                         <span class="flight-time-date">
                             <span class="flight-time">${f.arrTime || '--:--'}</span>
                             <span class="flight-date">${f.arrDate || '----/--/--'}</span>
@@ -1592,6 +1584,7 @@ function renderHistoryTable() {
     if (bookingsList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="text-align:center; padding:20px;">لا توجد حجوزات مسجلة حتى الآن</td></tr>`;
         dashboardTbody.innerHTML = `<tr><td colspan="6" class="text-center" style="text-align:center; padding:20px;">لا توجد حجوزات نشطة</td></tr>`;
+        syncTableCellLabels();
         return;
     }
 
@@ -1609,9 +1602,11 @@ function renderHistoryTable() {
             <td><span class="status-badge ${statusClass}">${b.bookingStatus}</span></td>
             <td><strong>${(b.totalPrice || 0).toFixed(2)} ${b.currency || ''}</strong></td>
             <td>
-                <button class="btn-icon btn-sm" onclick="editBooking('${b.id}')" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn-icon btn-sm" onclick="loadBookingToPreview('${b.id}')" title="معاينة"><i class="fa-solid fa-eye"></i></button>
-                <button class="btn-icon btn-sm text-danger" onclick="deleteBooking('${b.id}')" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                <div class="row-actions">
+                    <button class="btn-icon btn-sm" onclick="editBooking('${b.id}')" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn-icon btn-sm" onclick="loadBookingToPreview('${b.id}')" title="معاينة"><i class="fa-solid fa-eye"></i></button>
+                    <button class="btn-icon btn-sm text-danger" onclick="deleteBooking('${b.id}')" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                </div>
             </td>
         `;
         tbody.appendChild(tr);
@@ -1625,11 +1620,38 @@ function renderHistoryTable() {
                 <td><span class="status-badge ${statusClass}">${b.bookingStatus}</span></td>
                 <td><strong>${(Number(b.totalPrice) || 0).toFixed(2)} ${b.currency || ''}</strong></td>
                 <td>
-                    <button class="btn-icon btn-sm" onclick="loadBookingToPreview('${b.id}')" title="معاينة"><i class="fa-solid fa-eye"></i></button>
+                    <div class="row-actions">
+                        <button class="btn-icon btn-sm" onclick="loadBookingToPreview('${b.id}')" title="معاينة"><i class="fa-solid fa-eye"></i></button>
+                    </div>
                 </td>
             `;
             dashboardTbody.appendChild(dashTr);
         }
+    });
+
+    syncTableCellLabels();
+}
+
+/* نسخ عناوين الأعمدة (thead) إلى data-label لكل خلية، لتظهر كتسميات واضحة
+   عند تحويل الجدول إلى بطاقات على الشاشات الصغيرة.
+   هذا يخص واجهة الشاشة فقط ولا يمس الطباعة ولا تصدير PDF إطلاقاً. */
+function syncTableCellLabels() {
+    ['historyTable', 'dashboardRecentTable'].forEach(tableId => {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+
+        const headers = table.querySelectorAll('thead th');
+        if (!headers.length) return;
+
+        table.querySelectorAll('tbody tr').forEach(row => {
+            Array.prototype.forEach.call(row.children, (cell, index) => {
+                if (cell.tagName !== 'TD') return;
+                if (cell.hasAttribute('colspan')) return; // خلية رسالة فارغة
+                const header = headers[index];
+                if (!header) return;
+                cell.setAttribute('data-label', (header.textContent || '').trim());
+            });
+        });
     });
 }
 
