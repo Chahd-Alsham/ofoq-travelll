@@ -1,271 +1,3105 @@
-/* ==========================================
-   iOS STANDALONE (Add to Home Screen) FIXES
-   ========================================== */
+/* style.css */
+:root {
+    --navy: #0A192F;
+    --navy-light: #172A45;
+    --aviation-blue: #1E3A8A;
+    --sky-blue: #3B82F6;
+    --sky-light: #EFF6FF;
+    --gold: #D97706;
+    --gold-light: #FEF3C7;
+    --white: #FFFFFF;
+    --gray-50: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-400: #94A3B8;
+    --gray-600: #475569;
+    --gray-800: #1E293B;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+     --bassel: #ec99f7;
+     --bassell: #f5b5ff;
+     --magenta: #a11ab6;
+     --black: #000000;
+    --transition: all 0.3s ease;
+}
 
-/* 1. منع التمرير الأفقي للصفحة كلها الذي كان يقصّ أطراف العناصر على iPhone */
-html, body {
-    max-width: 100%;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Cairo', 'Inter', sans-serif;
+    background-color: var(--gray-50);
+    color: var(--gray-800);
+    direction: rtl;
+    text-align: right;
     overflow-x: hidden;
 }
 
-/* 2. منع التكبير بالنقر المزدوج واللمس المطاطي داخل التطبيق */
-body {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+html[dir="ltr"] body {
+    direction: ltr;
+    text-align: left;
 }
 
-/* 2b. عند فتح نافذة منبثقة: نثبّت تمرير الخلفية حتى لا تنزلق الصفحة خلفها */
-body.modal-open {
-    overflow: hidden;
+/* Layout */
+.app-container {
+    display: flex;
+    min-height: 100vh;
 }
 
-/* 3. منع تكبير iOS التلقائي عند التركيز على الحقول (يجب أن يكون حجم الخط >= 16px) */
-@media (max-width: 768px) {
-    input, select, textarea {
-        font-size: 16px !important;
-        line-height: 1.5;
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background-color: var(--navy);
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 100;
+    transition: var(--transition);
+    box-shadow: 4px 0 15px rgba(224, 200, 200, 0.089);
+}
+
+html[dir="ltr"] .sidebar {
+    right: auto;
+    left: 0;
+    box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+}
+
+.sidebar-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.brand-logo {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--sky-blue), var(--gold));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--white);
+}
+
+.brand-title h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.brand-title span {
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 1px;
+}
+
+.mobile-close-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 20px;
+    cursor: pointer;
+    margin-right: auto;
+}
+
+html[dir="ltr"] .mobile-close-btn {
+    margin-right: 0;
+    margin-left: auto;
+}
+
+.sidebar-nav {
+    padding: 20px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 24px;
+    color: var(--gray-400);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+    border-right: 3px solid transparent;
+}
+
+html[dir="ltr"] .nav-item {
+    border-right: none;
+    border-left: 3px solid transparent;
+}
+
+.nav-item i {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+}
+
+.nav-item:hover, .nav-item.active {
+    color: var(--white);
+    background-color: var(--navy-light);
+    border-color: var(--gold);
+}
+
+.sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    background-color: rgba(0,0,0,0.1);
+}
+
+.quick-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--gray-400);
+}
+
+.quick-stats strong {
+    color: var(--gold);
+    font-size: 16px;
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    margin-right: 260px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--gray-50);
+    min-width: 0;
+}
+
+html[dir="ltr"] .main-content {
+    margin-right: 0;
+    margin-left: 260px;
+}
+
+/* Topbar */
+.topbar {
+    height: 70px;
+    background-color: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+}
+
+.topbar-left, .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.mobile-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--navy);
+    cursor: pointer;
+}
+
+.search-global-box {
+    display: flex;
+    align-items: center;
+    background-color: var(--gray-100);
+    border-radius: 8px;
+    padding: 8px 14px;
+    width: 320px;
+    gap: 10px;
+}
+
+.search-global-box i {
+    color: var(--gray-400);
+}
+
+.search-global-box input {
+    border: none;
+    background: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 13px;
+    width: 100%;
+    color: var(--gray-800);
+}
+
+.topbar-select {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--gray-200);
+    background-color: var(--white);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--gray-800);
+    outline: none;
+}
+
+.user-profile-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    background-color: var(--sky-light);
+    padding: 6px 14px;
+    border-radius: 20px;
+}
+
+/* Content Sections */
+.content-body {
+    padding: 30px;
+    flex: 1;
+}
+
+.app-section {
+    display: none;
+}
+
+.app-section.active {
+    display: block;
+}
+
+/* Dashboard Cards */
+.welcome-banner {
+    background: linear-gradient(135deg, var(--navy), var(--aviation-blue));
+    color: var(--white);
+    border-radius: 16px;
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px rgba(10, 25, 47, 0.1);
+}
+
+.banner-text h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.banner-text p {
+    font-size: 14px;
+    color: var(--gray-300, #CBD5E1);
+}
+
+.dashboard-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.dash-card {
+    background-color: var(--white);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    border: 1px solid var(--gray-200);
+}
+
+.dash-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--white);
+}
+
+.dash-icon.bg-blue { background-color: var(--sky-blue); }
+.dash-icon.bg-gold { background-color: var(--gold); }
+.dash-icon.bg-green { background-color: var(--success); }
+
+.dash-info span {
+    font-size: 13px;
+    color: var(--gray-600);
+}
+
+.dash-info h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-top: 4px;
+}
+
+/* Tables */
+.section-card-full, .recent-bookings-preview {
+    background-color: var(--white);
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    border: 1px solid var(--gray-200);
+}
+
+.section-header-inline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header-inline h2, .section-header-inline h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: right;
+}
+
+html[dir="ltr"] .data-table {
+    text-align: left;
+}
+
+.data-table th, .data-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.data-table th {
+    background-color: var(--gray-50);
+    color: var(--gray-600);
+    font-weight: 600;
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--sky-light);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 12px;
+}
+
+.btn-primary {
+    background-color: var(--aviation-blue);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background-color: var(--navy);
+}
+
+.btn-secondary {
+    background-color: var(--gray-200);
+    color: var(--gray-800);
+}
+
+.btn-secondary:hover {
+    background-color: var(--gray-400);
+    color: var(--white);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 1px solid var(--aviation-blue);
+    color: var(--aviation-blue);
+}
+
+.btn-outline:hover {
+    background-color: var(--sky-light);
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    opacity: 0.9;
+}
+
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    color: var(--gray-800);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-icon:hover {
+    background-color: var(--aviation-blue);
+    color: var(--white);
+    border-color: var(--aviation-blue);
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    color: var(--sky-blue);
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.btn-text:hover {
+    text-decoration: underline;
+}
+
+/* Builder Split Workspace */
+.builder-workspace {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 1400px) {
+    .builder-workspace {
+        grid-template-columns: 1fr;
     }
 }
 
-/* 4. منطقة آمنة أعلى الشاشة (Notch / Dynamic Island) للهيدر */
-.app-header {
-    padding-top: env(safe-area-inset-top);
+.work-area-pane {
+    background-color: var(--white);
+    border-radius: 14px;
+    padding: 24px;
+    border: 1px solid var(--gray-200);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
 }
 
-/* 5. المنطقة الآمنة السفلية: شريط التنقل + الفوتر لا يختفيان خلف مؤشر Home */
-.app-bottom-nav {
-    padding: 0.5rem env(safe-area-inset-right) calc(0.5rem + env(safe-area-inset-bottom)) env(safe-area-inset-left);
-}
-
-.app-footer {
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-}
-
-body {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-}
-
-/* 6. الهيدر اللاصق: على iOS يجب أن يحسب ارتفاع المنطقة الآمنة في التمرير */
-.app-header-row {
-    min-height: 4rem;
-}
-
-/* 7. القائمة المنسدلة (نقر بدل hover) */
-.data-menu {
-    display: none;
-    max-height: 60vh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-.data-menu:not(.hidden) {
-    display: block;
-    animation: menuFadeIn 0.15s ease-out;
-}
-
-@keyframes menuFadeIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* 8. المودالات.
-   البنية: .modal-backdrop (طبقة) > .modal-box (flex column, ارتفاع محدود)
-           > .modal-box > header (ثابت) + form (-area القابلة للتمرير)
-   هذا يضمن: الرأس وأزرار الحفظ لا تُقصّ، والمحتوى وحده يتمرّر. */
-.modal-backdrop.hidden {
-    /* specificity (0,2,0) تتغلّب على .hidden في Tailwind مهما كان ترتيب التحميل.
-       بدون هذه القاعدة تُعرض كل النوافذ فوق بعضها عند فتح التطبيق. */
-    display: none !important;
-}
-
-.modal-backdrop {
+.pane-header {
     display: flex;
-    align-items: flex-start;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.pane-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.pane-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Form Styles */
+.form-section-card {
+    background-color: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.form-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-600);
+}
+
+.form-control {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+    background-color: var(--white);
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--gray-800);
+    outline: none;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.form-control:focus {
+    border-color: var(--sky-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.readonly-bold {
+    background-color: var(--gray-100);
+    font-weight: 700;
+    color: var(--navy);
+}
+
+/* Dynamic Item Cards in Form */
+.dynamic-item-card {
+    background-color: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 12px;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.item-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--aviation-blue);
+}
+
+/* Live Preview Pane & Document */
+.preview-pane {
+    background-color: var(--gray-200);
+    border-radius: 14px;
+    padding: 20px;
+    position: sticky;
+    top: 90px;
+    max-height: calc(100vh - 110px);
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    padding: 1rem;
+}
+
+.preview-pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.preview-badge {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Printable A4 Itinerary Document */
+.itinerary-preview-document {
+    background-color: var(--white);
+    width: 100%;
+    max-width: 210mm;
+    min-height: auto;
+    margin: 0 auto;
+    padding: 10mm 14mm;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border-radius: 4px;
+    position: relative;
+    box-sizing: border-box;
+    font-size: 12px;
+    color: var(--gray-800);
+    overflow: visible;
+}
+
+.doc-watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 140px;
+    font-weight: 900;
+    color: rgba(10, 25, 47, 0.02);
+    z-index: 0;
+    pointer-events: none;
+    letter-spacing: 10px;
+}
+
+.doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 16px;
+}
+
+.doc-company-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.doc-logo-box {
+    width: 70px;
+    height: 70px;
+    background-color: var(--navy);
+    color: var(--gold);
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    overflow: hidden;
+}
+
+.doc-logo-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.doc-company-info h2 {
+    font-size: 22px;
+    font-weight: 1000;
+    color: var(--navy);
+}
+
+.doc-company-info p {
+    font-size: 10px;
+    color: var(--gray-600);
+}
+
+.doc-meta-badge {
+    text-align: left;
+}
+
+html[dir="ltr"] .doc-meta-badge {
+    text-align: right;
+}
+
+.itinerary-title-badge {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--aviation-blue);
+    background-color: var(--sky-light);
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.doc-pnr-display {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 1px;
+}
+
+.doc-divider {
+    height: 2px;
+    background: linear-gradient(90deg, var(--aviation-blue), var(--gold));
+    margin: 14px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.doc-info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    background-color: var(--gray-50);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.doc-info-item span {
+    display: block;
+    font-size: 10px;
+    color: var(--gray-600);
+}
+
+.doc-info-item strong {
+    font-size: 12px;
+    color: var(--navy);
+}
+
+.doc-section {
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+.doc-section-heading {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--navy);
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Passengers Preview Cards */
+.preview-passengers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.preview-passenger-row {
+    background-color: var(--gray-50);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+}
+
+/* Flight Card Itinerary (Timeline style) */
+.preview-flights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.preview-flight-card {
+    background-color: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    padding: 12px 18px;
+    position: relative;
+    border-left: 5px solid var(--sky-blue);
+    margin-bottom: 8px;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+}
+
+html[dir="ltr"] .preview-flight-card {
+    border-right: 1px solid var(--gray-200);
+}
+
+.preview-flight-card.type-outbound { border-color: var(--sky-blue); }
+.preview-flight-card.type-transit { border-color: var(--bassel); }
+.preview-flight-card.type-return { border-color: var(--gold); }
+
+.preview-flight-card.type-outbound {
+    background-color: #f5fbff;
+}
+
+.preview-flight-card.type-transit {
+    background-color: #fff8fc;
+}
+
+.preview-flight-card.type-return {
+    background-color: #fffdf5;
+}
+
+.preview-flight-card.type-outbound .flight-route-grid,
+.preview-flight-card.type-transit .flight-route-grid,
+.preview-flight-card.type-return .flight-route-grid {
+    background-color: transparent;
+}
+
+/* حماية جميع عناصر التذكرة من الانقسام بين الصفحات */
+.itinerary-preview-document .doc-header,
+.itinerary-preview-document .doc-info-grid,
+.itinerary-preview-document .doc-section,
+.itinerary-preview-document .preview-passenger-row,
+.itinerary-preview-document .preview-flight-card,
+.itinerary-preview-document .pricing-section,
+.itinerary-preview-document .doc-notes-box,
+.itinerary-preview-document .doc-footer,
+.itinerary-preview-document .transit-waiting-banner {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+}
+
+/* فاصل الصفحات المنظم للطباعة وتصدير PDF */
+.pdf-page-break {
+    display: block;
+    margin: 18px 0 12px 0;
+    position: relative;
+}
+
+.pdf-page-break::before {
+    content: '';
+    display: block;
+    border-top: 2px dashed #cbd5e1;
+    margin-bottom: 12px;
+}
+
+.page-2-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 8px 14px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--navy);
+    border-right: 4px solid var(--sky-blue);
+}
+
+html[dir="ltr"] .page-2-header {
+    border-right: 1px solid #e2e8f0;
+    border-left: 4px solid var(--sky-blue);
+}
+
+.page-2-company {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-2-badge {
+    background: var(--sky-light);
+    color: var(--sky-blue);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.flight-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 11px;
+}
+
+.flight-type-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 10px;
+}
+
+.type-outbound-badge { background-color: var(--sky-light); color: var(--sky-blue); }
+.type-transit-badge { background-color: var(--gold-light); color: var(--gold); }
+.type-return-badge { background-color: #D1FAE5; color: var(--success); }
+
+.flight-airline-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    color: var(--navy);
+    direction: ltr !important; /* تثبيت اتجاه العناصر داخله لتبدأ من اليسار لليمين دائماً */
+}
+
+.airline-logo-mini {
+    width: 45px;
+    height: 45px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.flight-route-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--gray-50);
+    padding: 10px;
+    border-radius: 6px;
+    direction: ltr; /* لقلب اتجاه الرحلة بحيث تصبح المغادرة يساراً والوصول يميناً */
+}
+
+.flight-endpoint {
+    display: flex;
+    flex-direction: column;
+}
+
+.flight-endpoint.dest {
+    text-align: left;
+}
+
+html[dir="ltr"] .flight-endpoint.dest {
+    text-align: right;
+}
+
+.flight-city-name {
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--navy);
+}
+
+.flight-airport-code {
+    font-size: 11px;
+    color: var(--gray-600);
+}
+
+.flight-time-date {
+    margin-top: 2px;
+}
+
+.flight-time,
+.flight-date {
+    display: block;
+}
+
+.flight-time {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.flight-date {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+.flight-middle-graphic {
+    flex: 0 0 88px;
+    align-self: stretch;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: var(--gray-400);
+    font-size: 10px;
+}
+
+.flight-middle-graphic i {
+    font-size: 14px;
+    color: var(--sky-blue);
+}
+
+.flight-transit-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.flight-transit-icon i {
+    font-size: 12px !important;
+    position: static !important;
+    top: auto !important;
+}
+
+.flight-transit-icon .fa-arrows-rotate {
+    font-size: 10px !important;
+}
+
+.flight-details-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 10px;
+    color: var(--gray-600);
+    border-top: 1px dashed var(--gray-200);
+    padding-top: 6px;
+}
+
+/* Transit Waiting Box */
+.transit-waiting-banner {
+    background-color: var(--bassell);
+    border: 1.5px dashed var(--magenta);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #8a0478;
+    font-weight: 600;
+}
+
+/* Pricing Box in PDF */
+.pricing-box {
+    background-color: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 4px 10px;
+    width: 100%;
+    margin-left: auto;
+}
+
+html[dir="ltr"] .pricing-box {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 2px;
+    color: var(--gray-600);
+}
+
+.price-row.total-row {
+    border-top: 1px solid var(--gray-200);
+    padding-top: 6px;
+    margin-top: 4px;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--navy);
+}
+
+.doc-notes-box {
+    background-color: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #991B1B;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    margin-bottom: 14px;
+}
+
+.doc-footer {
+    text-align: center;
+    border-top: 1px solid var(--gray-200);
+    padding-top: 10px;
+    font-size: 10px;
+    color: var(--gray-600);
+    position: absolute;
+    bottom: 10mm;
+    left: 15mm;
+    right: 15mm;
+}
+
+.company-contact-line {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 4px;
+    font-size: 9px;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+}
+.status-confirmed { background-color: #D1FAE5; color: var(--success); }
+.status-onhold { background-color: var(--gold-light); color: var(--gold); }
+.status-cancelled { background-color: #FEE2E2; color: var(--danger); }
+
+/* Airlines Grid */
+.airlines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.airline-card {
+    background-color: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.airline-card-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.airline-card-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
+}
+
+.airline-card-text h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.airline-card-text span {
+    font-size: 12px;
+    color: var(--gray-600);
+}
+
+.airline-card-actions {
+    display: flex;
+    gap: 6px;
+}
+
+/* Settings Form */
+.settings-form {
+    margin-top: 20px;
+}
+
+.logo-preview-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--navy);
+    overflow: hidden;
+}
+
+.logo-preview-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.form-actions-bar {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Modals */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .modal-box {
-    /* dvh بدل vh: 100vh في iOS Standalone تتجاوز حدود الشاشة الحقيقية */
-    max-height: calc(100dvh - 2rem);
-    min-height: 0;
+    background-color: var(--white);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 450px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.modal-header {
     display: flex;
-    flex-direction: column;
-    /* البنية المرنية تتطلب overflow على الصندوق نفسه لإخفاء أي تجاوز */
-    overflow: hidden;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 10px;
 }
 
-/* رأس النافذة: ثابت لا يتمرّر */
-.modal-box > div:first-child {
-    flex: 0 0 auto;
+.modal-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
 }
 
-/* الصيغة: هي المنطقة القابلة للتمرير فقط (تحتوي كل الحقول وأزرار الحفظ) */
-.modal-box > form {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--gray-600);
 }
 
-/* دعم المتصفحات القديمة التي لا تدعم dvh */
-@supports not (height: 100dvh) {
-    .modal-box {
-        max-height: calc(100vh - 2rem);
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Responsive Mobile Rules */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(100%);
     }
-}
-
-/* على الشاشات المتوسطة وما فوق: إبقاء المودال متمركزاً كما كان */
-@media (min-width: 640px) {
-    .modal-backdrop {
-        align-items: center;
+    html[dir="ltr"] .sidebar {
+        transform: translateX(-100%);
     }
-}
-
-/* شاشات قصيرة (iPhone أفقي / نوافذ منخفضة):
-   نستخدم max-height subtractive لأن 100% لا يخصم padding الحاوية
-   في flexbox مع box-sizing:border-box، ما كان يدفع المودال خارج الشاشة. */
-@media (max-height: 520px) {
-    .modal-backdrop {
-        align-items: flex-start;
+    .sidebar.mobile-open {
+        transform: translateX(0);
     }
-    .modal-box {
-        max-height: calc(100dvh - 2rem);
+    .main-content {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
     }
-}
-
-/* 9. تمرير أفقي سلس للجداول على iOS مع منع الترتد (Bounce) غير المرغوب */
-.table-scroll {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    /* ظل داخلي يوضّح وجود محتوى خارج الشاشة (يمين في RTL / يسار في LTR) */
-    background:
-        linear-gradient(to left, rgb(2 6 23 / 0.55), transparent 24px) right center,
-        linear-gradient(to right, rgb(2 6 23 / 0.55), transparent 24px) left center;
-    background-attachment: local, scroll;
-    background-repeat: no-repeat;
-    background-size: 32px 100%, 32px 100%;
-}
-
-/* 10. مساحة لمس مريحة على الأزرار الصغيرة داخل الجداول (iOS) */
-@media (max-width: 768px) {
-    .table-scroll button {
-        min-width: 2.25rem;
-        min-height: 2.25rem;
+    .mobile-toggle-btn, .mobile-close-btn {
         display: inline-flex;
-        align-items: center;
-        justify-content: center;
+    }
+    .search-global-box {
+        width: 180px;
     }
 }
 
-/* 11. منع الاهتزاز الناتج عن التداخل بين التمرير الأفقي والعمودي على iOS */
-body, header, main, footer {
-    transform: translateZ(0);
-}
-
-/* 12. فقط عند العمل كتطبيق مثبت (standalone) - تعويض شريط الحالة العلوي */
-@media (display-mode: standalone) {
-    .app-header {
-        padding-top: max(env(safe-area-inset-top), 0px);
-    }
-}
-
-/* 13. إخفاء وميض الإقلاع الأبيض عند فتح التطبيق المثبت */
-html {
-    background-color: #020617;
-}
-
-/* ==========================================
-   Custom Styles & Professional A4 Print Optimization
-   ========================================== */
+/* Print Specific Rules */
 @media print {
     body {
-        background-color: #ffffff !important;
-        color: #000000 !important;
-        font-family: 'Cairo', 'Inter', sans-serif !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-    
-    /* Hide all app navigation and controls during print */
-    header, footer, nav, button, .no-print {
-        display: none !important;
-    }
-
-    /* Show print container */
-    #printArea {
-        display: block !important;
-        width: 100% !important;
+        background: #ffffff !important;
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    @page {
-        size: A4;
-        margin: 15mm;
-    }
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-::-webkit-scrollbar-track {
-    background: #090d16;
-}
-::-webkit-scrollbar-thumb {
-    background: #1e293b;
-    border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #334155;
-}
-@media print {
-    /* 1. إخفاء كافة عناصر واجهة البرنامج الأساسية والقوائم والأزرار */
-    body * {
-        visibility: hidden !important;
+    aside, nav, .sidebar, .no-print, button, .preview-actions, .preview-pane-header {
+        display: none !important;
     }
 
-    /* 2. إظهار حاوية تقرير المشروع ومحتوياتها فقط */
-    #printArea, #printArea * {
-        visibility: visible !important;
-    }
-
-    /* 3. إعادة ضبط موقع وحجم حاوية الطباعة لملء الصفحة بشكل كامل ونظيف */
-    #printArea {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
+    .app-container, .main-content, .content-body, .preview-pane {
+        padding: 0 !important;
         margin: 0 !important;
-        padding: 10px !important;
-        background: #ffffff !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        overflow: visible !important;
+        max-height: none !important;
+        position: static !important;
+    }
+
+    #itineraryPrintDoc {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 8mm 12mm !important;
         box-shadow: none !important;
         border: none !important;
+        min-height: auto !important;
+        overflow: visible !important;
     }
 
-    /* 4. إزالة أي هوامش زائدة للصفحة لضمان عدم ظهور صفحات فارغة إضافية عند التصدير لـ PDF */
-    @page {
-        size: A4;
-        margin: 10mm;
+    /* منع انقسام بطاقات الرحلات والمسافرين عبر الصفحات */
+    .preview-flight-card,
+    .flight-card,
+    .preview-passenger-row,
+    .doc-section,
+    .doc-header,
+    .doc-info-grid,
+    .pricing-section,
+    .doc-notes-box,
+    .doc-footer,
+    .transit-waiting-banner {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+
+    .preview-flight-card {
+        margin-bottom: 8px !important;
+        padding: 10px 16px !important;
+        border-radius: 10px !important;
+    }
+
+    /* الفاصل الحقيقي المعتمد من المتصفحات عند الحاجة */
+    .force-page-break {
+        break-before: page !important;
+        page-break-before: always !important;
+        display: block !important;
+        margin-top: 0 !important;
+        padding-top: 10mm !important;
+    }
+
+    .pdf-page-break {
+        break-inside: avoid !important;
+        break-after: page !important;
+        page-break-after: always !important;
+    }
+
+    .pdf-page-break::before {
+        display: none !important;
+    }
+
+    .page-2-header {
+        margin-top: 4mm !important;
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+    }
+}
+/* ==========================================================
+   إصلاح وتنسيق أيقونة الطائرة التالفة (المستطيل الذي يحتوي على علامة X)
+   ========================================================== */
+
+/* 1. تحديد حجم ولون ومكان الأيقونة أو العنصر الذي يمثل خط الرحلة */
+.itinerary-preview-document .preview-flight-card .flight-route-grid .fa-plane,
+.itinerary-preview-document .preview-flight-card .flight-route-grid [class*="plane"],
+.itinerary-preview-document .preview-flight-card .flight-route-grid .fa,
+.itinerary-preview-document .preview-flight-card .flight-route-grid i {
+    font-size: 22px !important;       /* حجم أيقونة الطائرة */
+    color: #409dc2 !important;        /* لون أيقونة الطائرة */
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+/* 2. تحكم كامل بالخط الفاصل وأيقونة وسط المسار ( بين المدينتين ) */
+.itinerary-preview-document .preview-flight-card .flight-route-grid .route-center,
+.itinerary-preview-document .preview-flight-card .flight-route-grid .flight-icon-container {
+    text-align: center !important;
+    font-size: 12px !important;
+    color: #64748b !important;
+}
+
+/* 3. في حال رغبت بإخفاء الأيقونة التالفة تماماً ومنع ظهور المربع المزعج */
+/* (قم بإزالة علامات التعليق //. من البداية والنهاية لو أردت إخفاءها نهائياً واستبدالها بنقاط أو مسار عادي) */
+/*
+.itinerary-preview-document .preview-flight-card .flight-route-grid .fa-plane {
+    display: none !important;
+}
+*/
+/* ==========================================================
+   التحكم الدقيق 100% لكل خلية وسطر داخل بطاقة الرحلة (معزل تماماً)
+   ========================================================== */
+
+/* 1. السطر الأول في البطاقة: اسم شركة الطيران ورقم الرحلة (أعلى اليسار/اليمين) */
+.itinerary-preview-document .preview-flight-card tr:nth-child(1) td,
+.itinerary-preview-document .preview-flight-card tr:nth-child(1) span {
+    font-size: 13px !important;
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+
+/* 2. أسماء المدن والبلدان (مثل Algiers و Aleppo) */
+.itinerary-preview-document .preview-flight-card tr:nth-child(2) td:nth-child(1),
+.itinerary-preview-document .preview-flight-card tr:nth-child(2) td:nth-child(3) {
+    font-size: 14px !important;
+    color: #1e293b !important;
+    font-weight: 700 !important;
+}
+
+/* 3. أكواد المطارات والمحطات الفرعية (مثل ALG, T1, IST) */
+.itinerary-preview-document .preview-flight-card tr:nth-child(3) td span,
+.itinerary-preview-document .preview-flight-card tr:nth-child(2) small {
+    font-size: 11px !important;
+    color: #64748b !important;
+}
+
+/* 4. أوقات الإقلاع والوصول (التي نجحت معك سابقاً - نثبتها هنا) */
+.itinerary-preview-document .preview-flight-card .flight-time,
+.itinerary-preview-document .preview-flight-card tr:nth-child(4) td {
+    font-size: 13px !important;
+    color: #2563eb !important;
+    font-weight: 600 !important;
+}
+
+/* 5. معلومات الدرجة والمقعد (Class & Seat - عادة في الأسفل) */
+.itinerary-preview-document .preview-flight-card tr:nth-last-child(2) td {
+    font-size: 12px !important;
+    color: #334155 !important;
+    font-weight: 500 !important;
+}
+
+/* 6. معلومات الأمتعة والأوزان (Checked & Cabin Baggage - أقصى أسفل البطاقة) */
+.itinerary-preview-document .preview-flight-card tr:last-child td {
+    font-size: 11px !important;
+    color: #15803d !important;
+    font-weight: 400 !important;
+}
+/* ==========================================================
+   تنسيق عناصر بطاقة الرحلة المستقلة (عبر استهداف بنية الـ DOM المباشرة)
+   ========================================================== */
+
+/* 1. تنسيق اسم المدينة (Departure & Arrival Cities) */
+.itinerary-preview-document .preview-flight-card .city-name,
+.itinerary-preview-document .preview-flight-card [class*="city"] {
+    font-size: 23px !important;
+    color: #000000 !important;
+    font-weight: 1000 !important;
+}
+
+/* 2. تنسيق أكواد المطارات والمحطات (Airport Code & Terminal) */
+.itinerary-preview-document .preview-flight-card .airport-code,
+.itinerary-preview-document .preview-flight-card [class*="airport"],
+.itinerary-preview-document .preview-flight-card [class*="terminal"] {
+    font-size: 12px !important;
+    color: #6e6e6e !important;
+    font-weight: 900 !important;
+}
+
+/* 3. تنسيق أوقات الرحلة (Departure & Arrival Times) */
+.itinerary-preview-document .preview-flight-card .flight-time,
+.itinerary-preview-document .preview-flight-card [class*="time"] {
+    font-size: 20px !important;
+    color: #1e293b !important;
+    font-weight: 700 !important;
+}
+
+/* 4. تنسيق تواريخ الرحلة (Dates) */
+.itinerary-preview-document .preview-flight-card .flight-date,
+.itinerary-preview-document .preview-flight-card [class*="date"] {
+    font-size: 15px !important;
+    color: #131e7e !important;
+    font-weight: 500 !important;
+}
+
+/* 5. تنسيق معلومات الأمتعة (Baggage - Checked & Cabin) */
+.itinerary-preview-document .preview-flight-card [class*="baggage"] {
+    font-size: 11px !important;
+    color: #15803d !important; /* لون أخضر مميز لأوزان الأمتعة */
+    font-weight: 500 !important;
+}
+
+/* 6. تنسيق درجة السفر ورقم المقعد (Class & Seat) */
+.itinerary-preview-document .preview-flight-card [class*="class"],
+.itinerary-preview-document .preview-flight-card [class*="seat"] {
+    font-size: 12px !important;
+    color: #b45309 !important; /* لون مميز لدرجة السفر والمقعد */
+    font-weight: 600 !important;
+}
+/* ==========================================================
+   الحل النهائي لتثبيت أطراف المغادرة والوصول مع direction: ltr
+   ========================================================== */
+
+.itinerary-preview-document .preview-flight-card .flight-route-grid {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    direction: ltr !important;
+    background-color: var(--gray-50);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+/* 1. تثبيت جهة المغادرة على اليسار تماماً بعرض ثابت */
+.itinerary-preview-document .preview-flight-card .flight-route-grid > div:first-child {
+    flex: 0 0 47% !important;
+    max-width: 47% !important;
+    text-align: left !important;
+}
+
+/* 2. أيقونة الطائرة في المنتصف (تثبيت مكانها) */
+.itinerary-preview-document .preview-flight-card .flight-route-grid > div:nth-child(2) {
+    flex: 0 0 6% !important;
+    text-align: center !important;
+}
+
+.itinerary-preview-document .preview-flight-card.type-outbound .flight-route-grid,
+.itinerary-preview-document .preview-flight-card.type-transit .flight-route-grid,
+.itinerary-preview-document .preview-flight-card.type-return .flight-route-grid {
+    background-color: transparent !important;
+}
+
+/* 3. تثبيت جهة الوصول على اليمين تماماً ومنع تأثرها بطول اسم المطار */
+.itinerary-preview-document .preview-flight-card .flight-route-grid > div:last-child {
+    flex: 0 0 47% !important;
+    max-width: 47% !important;
+    text-align: right !important;
+}
+
+/* 4. السماح للأسماء الطويلة بالالتفاف والنزول للأسفل حصراً ضمن مساحتها */
+.itinerary-preview-document .preview-flight-card .flight-route-grid span,
+.itinerary-preview-document .preview-flight-card .flight-route-grid small,
+.itinerary-preview-document .preview-flight-card .flight-route-grid strong {
+    display: block !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+/* ==========================================================
+   التحكم الكامل بمعلومات المسافر (الحجم، اللون، والتنسيق)
+   ========================================================== */
+
+/* ==========================================================
+   التحكم المستقل بحجم ولون كل عنصر في معلومات المسافر
+   ========================================================== */
+
+/* الحاوية لصف المسافر بالكامل */
+.itinerary-preview-document .preview-passenger-row {
+    padding: 6px 0;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+/* 1. اسم المسافر ورقم التسلسل */
+.itinerary-preview-document .passenger-num-name {
+    font-size: 16px !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+}
+
+/* 2. نوع المسافر (Adult / Child) */
+.itinerary-preview-document .passenger-type {
+    font-size: 11px !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+}
+
+/* 3. رقم جواز السفر */
+.itinerary-preview-document .passenger-passport {
+    font-size: 12px !important;
+    color: #000000 !important; /* لون مستقل لجواز السفر */
+    font-weight: 800 !important; /* تسميك الخط */
+}
+
+/* 4. الجنس */
+.itinerary-preview-document .passenger-gender {
+    font-size: 12px !important;
+    color: #000000 !important; /* لون مستقل للجنس */
+    font-weight: 800 !important; /* تسميك الخط */
+}
+
+/* 5. تاريخ الميلاد (DOB) */
+.itinerary-preview-document .passenger-dob {
+    font-size: 12px !important;
+    color: #000000 !important; /* لون مستقل لتاريخ الميلاد */
+    font-weight: 800 !important;
+}
+/* الحاوية الكلية لمعلومات المسافر الثانوية */
+.itinerary-preview-document .passenger-sub-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important; /* مسافة متساوية ومرتبة بين العناصر */
+    direction: ltr !important; /* لضمان قراءة البيانات الإنجليزية بشكل صحيح */
+    font-size: 12px !important;
+}
+
+.itinerary-preview-document .passenger-sub-info span {
+    display: inline-block !important;
+}
+/* تثبيت اتجاه صف المسافر ليظل بنفس الترتيب بغض النظر عن لغة التطبيق */
+.itinerary-preview-document .preview-passenger-row {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    direction: ltr !important;
+    text-align: left !important;
+    padding: 8px 10px !important;
+    background-color: #f8fafc;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+/* التأكد من بقاء محاذاة النصوص داخل الصف ثابتة */
+.itinerary-preview-document .preview-passenger-row .passenger-main-info {
+    text-align: left !important;
+}
+
+.itinerary-preview-document .preview-passenger-row .passenger-sub-info {
+    text-align: right !important;
+}
+
+/* 1. إعطاء ترويسة التذكرة تموضع نسبي لتكون هي المرجع الأساسي */
+.doc-header {
+    position: relative !important;
+}
+
+/* 2. رفع عناصر التواصل وجبرها على الاستقرار في أعلى اليسار عمودياً */
+/* تثبيت الشعار ومعلومات الطيران ليكون اللوغو دائماً باليسار */
+.flight-airline-info {
+    display: flex !important;
+    align-items: center !important;
+    direction: ltr !important;
+    gap: 6px;
+    font-weight: 700;
+    color: var(--navy);
+}
+
+.airline-logo-mini {
+    width: 45px !important;
+    height: 45px !important;
+    border-radius: 4px !important;
+    object-fit: cover !important;
+}
+
+/* تنسيق الفوتر وخطوط الاتصال ليتغير موقعه حسب لغة الصفحة (يسار للعربية / يمين للأجنبية) */
+.doc-footer .company-contact-line,
+#previewContactLine {
+    position: absolute !important;
+    top: 0 !important;
+    bottom: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    background: transparent !important;
+    padding: 0 !important;
+    z-index: 999 !important;
+}
+
+/* عندما تكون اللغة العربية RTL (يظهر في أقصى اليسار) */
+html[dir="rtl"] .doc-footer .company-contact-line,
+html[dir="rtl"] #previewContactLine {
+    left: 0 !important;
+    right: auto !important;
+    text-align: left !important;
+    align-items: flex-start !important;
+    direction: ltr !important;
+}
+
+/* عندما تكون اللغة أجنبية LTR إنجليزي أو فرنسي (يظهر في اليمين) */
+html[dir="ltr"] .doc-footer .company-contact-line,
+html[dir="ltr"] #previewContactLine {
+    left: auto !important;
+    right: 0 !important;
+    text-align: right !important;
+    align-items: flex-end !important;
+    direction: ltr !important;
+}
+
+/* ترتيب الأيقونات والنصوص بجانب بعضها */
+#previewContactLine span {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+#previewContactLine {
+    margin-top: -18px !important;
+}
+@media print {
+    /* اجبار عنصر الـ PNR وكل محتوياته على الظهور بقوة ودون شروط أثناء التصدير أو الطباعة */
+    #docPNR {
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #000 !important; /* لضمان وضوح اللون أسود أو اللون المخصص */
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+.doc-meta-badge {
+    position: relative;          /* أو absolute حسب تصميمه الحالي */
+    top: 50px !important;        /* يزيحه للأسفل بمقدار معين دون أن يختفي أو يتداخل */
+}
+/* ==========================================================================
+   (س) ترويسة مستند التذكرة — عمودان ثابتان لا ينعكسان مع تغيّر اللغة
+   --------------------------------------------------------------------------
+   المطلوب:
+   1) العمود الأيمن = شعار الشركة + الاسم  (ثابت دائماً على اليمين)
+   2) العمود الأيسر = معلومات الاتصال + رمز الـ PNR (ثابت دائماً على اليسار)
+   3) ثبات الاتجاه: لا انعكاس للأعمدة عند التبديل بين العربية (rtl) والفرنسية/الإنجليزية (ltr)
+
+   الحل: تحويل .doc-header إلى شبكة (Grid) ترتيبها فيزيائي ثابت عبر
+        "direction: ltr" على الحاوية + تعيين عمود/سطر لكل عنصر صراحةً،
+        لذلك لا تعتمد التخطيطات على الوراثة العكسية للغة إطلاقاً.
+
+   كما أن هذا يُلغي الحِيَل（旧 الهوامش السالبة و top:50px ) التي كانت
+   تتداخل وتُزيح العناصر، فتختفي الحاجة إليها.
+   ========================================================================== */
+.doc-header {
+    display: grid !important;
+    /* الترتيب الفيزيائي الثابت: يمنع انعكاس الأعمدة عند تغيير اللغة */
+    direction: ltr !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: start;
+    justify-content: stretch;
+    column-gap: 18px;
+    row-gap: 6px;
+    /* position: relative محفوظ من القاعدة السابقة (لأجل العلامة المائية) */
+    margin-bottom: 16px;
+}
+
+/* ---------- العمود الأيمن (العمود الفيزيائي الثاني): الشعار والاسم ---------- */
+.doc-header > .doc-company-info {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    /* اتجاه القراءة يتبع اللغة، لكن المكان يبقى يميناً دائماً */
+    direction: rtl;
+    justify-content: flex-start;
+    text-align: right;
+}
+
+.doc-header > .doc-company-info > div:last-child {
+    min-width: 0;
+    overflow-wrap: break-word;
+}
+
+/* ---------- العمود الأيسر (العمود الفيزيائي الأول): معلومات الاتصال ----------
+   المُحدِّدات هنا أقوى من "html[dir=...] #previewContactLine" القديمة
+   حتى لا تُعيد محاذاة اليمين/اليسار القديمة سريانها مع تغيّر اللغة. */
+html body .doc-header > #previewContactLine {
+    grid-column: 1;
+    grid-row: 1;
+    /* إلغاء التموضع المطلق القديم (وهو سبب التداخل والهامش السالب) */
+    position: static !important;
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    margin: 0 !important;
+    z-index: auto !important;
+    transform: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start;
+    gap: 4px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    /* محتوى الاتصال لاتيني دائماً => اتجاه ثابت ومحاذاة يسار */
+    direction: ltr !important;
+    text-align: left !important;
+    min-width: 0;
+}
+
+/* ---------- العمود الأيسر: رمز الحجز PNR ---------- */
+html body .doc-header > .doc-meta-badge {
+    grid-column: 1;
+    grid-row: 2;
+    /* إلغاء إزاحة top:50px التي كانت تزيح شارة الـ PNR لأسفل */
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    text-align: left !important;
+    min-width: 0;
+}
+
+/* ---------- ترويسة الصفحة الثانية (تابع جدول الرحلات): نفس المنطق ---------- */
+.page-2-header {
+    display: flex !important;
+    direction: ltr !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 10px;
+    /* الشريط اللوني يبقى على اليمين دائماً مثل العمود الأيمن */
+    border-right: 4px solid var(--sky-blue);
+}
+
+.page-2-header > .page-2-company {
+    order: 2;
+    direction: rtl;
+    text-align: right;
+    min-width: 0;
+}
+
+.page-2-header > .page-2-badge {
+    order: 1;
+    text-align: left;
+    min-width: 0;
+}
+
+html[dir="ltr"] .page-2-header {
+    border-right: 4px solid var(--sky-blue);
+    border-left: 1px solid #e2e8f0;
+}
+@media print {
+    /* السماح بطباعة الصور والخلفيات */
+    img {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        display: inline-block !important;
     }
 }
 @media print {
-  @page {
-    margin: 10mm;
-    size: auto;
+  /* إجبار المتصفح على طباعة الصور والخلفيات بدقة كاملة */
+  img, .airline-logo {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    display: inline-block !important;
+    visibility: visible !important;
   }
-  body {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  
+  /* إخفاء أي عناصر غير مهمة أثناء الطباعة إن وجدت */
+  .no-print {
+    display: none !important;
   }
 }
+.preview-notes-class {
+    white-space: pre-line;
+}
+#previewBookingNotes {
+    white-space: pre-line;
+}
+/* ضع هنا اسم الكلاس أو الـ ID للعنصر الذي يعرض الملاحظات في التذكرة */
+.preview-notes-class, #previewBookingNotes {
+    white-space: pre-line;
+}
+#previewNotesBoxContainer {
+    margin-bottom: 25px !important;
+}
+/* توسيط أيقونة الطائرة بدقة */
+.itinerary-preview-document .flight-middle-graphic i {
+    font-size: 18px !important;
+    color: #0284c7 !important;
+    position: static !important;
+    top: auto !important;
+}
+
+.itinerary-preview-document .flight-middle-graphic .flight-transit-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+.itinerary-preview-document .flight-middle-graphic .flight-transit-icon i {
+    font-size: 12px !important;
+    position: static !important;
+    top: auto !important;
+}
+
+.itinerary-preview-document .flight-middle-graphic .flight-transit-icon .fa-arrows-rotate {
+    font-size: 10px !important;
+}
+/* إخفاء سطر السعر الأساسي والضرائب */
+tr:has(#previewBaseFare),
+tr:has(#previewTaxFees) {
+    display: none !important;
+}
+
+div:has(> #previewBaseFare),
+div:has(> #previewTaxFees) {
+    display: none !important;
+}
+
+/* تخصيص خلفية البوكس، الإطار، وإزالة الخطوط الداخلية */
+.itinerary-preview-document .pricing-box,
+.itinerary-preview-document .pricing-section {
+    background-color: #b8facc !important; /* لون الخلفية الجديد (اختر الدرجة التي تناسبك) */
+    border: 2px solid #b8facc !important;   /* لون الإطار الخارجي */
+    border-radius: 10px !important;         /* انحناء الأطراف */
+    padding: 2px !important;              /* مساحة داخلية مريحة */
+    box-shadow: none !important;
+    background-image: none !important;
+}
+
+/* إزالة أي حدود أو خطوط داخلية بين العناصر المتبقية */
+.itinerary-preview-document .pricing-box tr,
+.itinerary-preview-document .pricing-box td,
+.itinerary-preview-document .pricing-box div {
+    border: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+/* إظهار العبارة بشكل دائم على الشاشة وفي الطباعة */
+.page-break-footer-notice {
+    display: block; 
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #555;
+    padding: 10px 0;
+    margin-top: 15px;
+    border-top: 1px dashed #bbb;
+}
+
+/* ==========================================================================
+   Ofoq Travel — طبقة التجاوب (Responsive Layer) لواجهة الشاشة فقط
+   --------------------------------------------------------------------------
+   قواعد العزل المطبَّقة على كل ما يلي:
+   1) كل قاعدة هنا داخل @media screen  ← لا تُطبَّق إطلاقاً عند الطباعة (@media print).
+   2) كل قاعدة تخص مستند التذكرة (#itineraryPrintDoc) مُسبَقة بـ
+      "html body .preview-pane .itinerary-preview-document"، لأن html2pdf
+      ينسخ #itineraryPrintDoc فقط ويضعه في:
+         body > .html2pdf__overlay > .html2pdf__container > #itineraryPrintDoc
+      أي دون سلف من نوع .preview-pane → يستحيل أن تطابق أي نسخة PDF.
+   3) لم تُعدَّل أي قاعدة خاصة بـ A4 أو الترقيم أو الطباعة أو أحجام خط الـ PDF.
+   ========================================================================== */
+
+/* ============================ (أ) أساسيات مشتركة ============================ */
+@media screen {
+
+    html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    /* منع أي عنصر من تجاوز عرض الشاشة بسبب Lack of min-width:0 */
+    .app-container,
+    .main-content,
+    .content-body,
+    .app-section,
+    .topbar, .topbar-left, .topbar-right,
+    .builder-workspace, .work-area-pane, .pane-header, .pane-actions,
+    .form-section-card, .form-grid, .dynamic-item-card, .item-card-header,
+    .dashboard-cards-grid, .dash-card, .dash-info,
+    .airlines-grid, .airline-card, .airline-card-info, .airline-card-text, .airline-card-actions,
+    .welcome-banner, .banner-text, .banner-action,
+    .section-card-full, .recent-bookings-preview, .section-header-inline, .form-section-title,
+    .dropdown-container, .user-profile-badge, .search-global-box, .search-box-sm,
+    .modal-box, .modal-header, .modal-footer, .form-actions-bar,
+    .sidebar-header, .brand-title, .nav-item, .quick-stats,
+    .preview-pane, .preview-pane-header, .preview-badge, .preview-actions,
+    .table-responsive {
+        min-width: 0;
+    }
+
+    .app-container,
+    .main-content,
+    .content-body,
+    .app-section {
+        max-width: 100%;
+    }
+
+    /* شبكات لا يمكن أن تتجاوز عرض الشاشة أبداً (min() تمنع التمرير الأفقي) */
+    .dashboard-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    }
+
+    .airlines-grid {
+        grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+    }
+
+    /* القائمة الجانبية: تمرير داخلي بدل قصّ عناصرها في الشاشات القصيرة */
+    .sidebar {
+        max-width: 86vw;
+    }
+
+    .sidebar-header { flex: 0 0 auto; }
+
+    .sidebar-nav {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .sidebar-footer { flex: 0 0 auto; }
+
+    /* النصوص العربية: منع خروجها أو تداخلها مع الأيقونات والقوائم */
+    .nav-item span,
+    .brand-title h2,
+    .dash-info span,
+    .airline-card-text h4,
+    .section-header-inline h2,
+    .section-header-inline h3,
+    .pane-header h2,
+    .modal-header h3,
+    .form-section-title,
+    .item-card-header span {
+        min-width: 0;
+        overflow-wrap: break-word;
+        word-break: normal;
+        line-height: 1.5;
+    }
+
+    .nav-item i {
+        flex: 0 0 24px;
+    }
+
+    /* صندوق البحث في سجل الحجوزات (كان بدون تنسيق) */
+    .search-box-sm {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .search-box-sm input {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        padding: 8px 12px;
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+        background-color: var(--gray-100);
+        font-family: inherit;
+        font-size: 13px;
+        color: var(--gray-800);
+        outline: none;
+        transition: var(--transition);
+    }
+
+    .search-box-sm input:focus {
+        border-color: var(--sky-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* صفّ أزرار الإجراءات داخل خلايا الجدول */
+    .row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    /* التمرير الأفقي مسموح داخل الجداول فقط (العنصر المحدّد الذي يحتاجه) */
+    .table-responsive {
+        max-width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .data-table td {
+        overflow-wrap: break-word;
+    }
+
+    .data-table td > .status-badge {
+        white-space: nowrap;
+    }
+}
+/* ==================== (ب) شاشات سطح المكتب الكبيرة >= 1700px ==================== */
+@media screen and (min-width: 1700px) {
+    .sidebar { width: 284px; }
+    .main-content { margin-right: 284px; }
+    html[dir="ltr"] .main-content { margin-right: 0; margin-left: 284px; }
+    .content-body { padding: 34px 38px 40px; }
+    .topbar { padding: 0 34px; }
+    .search-global-box { width: 380px; }
+    .builder-workspace { gap: 30px; }
+    .preview-pane { padding: 24px; }
+    .section-card-full, .recent-bookings-preview, .work-area-pane { padding: 28px; }
+}
+
+/* ============ (ج) لابتوب / سطح مكتب صغير (993px - 1199px) ============ */
+@media screen and (max-width: 1199px) {
+    .sidebar { width: 236px; }
+    .main-content { margin-right: 236px; }
+    html[dir="ltr"] .main-content { margin-right: 0; margin-left: 236px; }
+    .content-body { padding: 22px 22px 28px; }
+    .topbar { padding: 0 20px; }
+    .search-global-box { width: 260px; }
+    .builder-workspace { gap: 18px; }
+}
+/* ======== (د) لوحيات + هواتف كبيرة + هواتف أفقية (<= 992px) ======== */
+@media screen and (max-width: 992px) {
+
+    /* الشريط العلوي: التف بدل الخروج عن الشاشة */
+    .topbar {
+        height: auto;
+        min-height: 60px;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+        align-items: center;
+    }
+
+    .topbar-left { flex: 1 1 240px; }
+    .topbar-right { flex: 0 1 auto; flex-wrap: wrap; gap: 8px; }
+
+    .search-global-box {
+        width: auto;
+        flex: 1 1 auto;
+        max-width: none;
+        min-width: 0;
+        min-height: 46px;
+        padding: 0 12px;
+    }
+
+    .search-global-box i { flex: 0 0 auto; }
+
+    /* ارتفاع اللمس: الحقل يملأ صندوق البحث (44px) لمنع التكبير على iOS */
+    .search-global-box input {
+        font-size: 16px;
+        min-width: 0;
+        min-height: 44px;
+        padding: 0;
+    }
+
+    .topbar-select {
+        font-size: 15px;
+        min-height: 44px;
+        max-width: 100%;
+        padding: 8px 10px;
+    }
+
+    .mobile-toggle-btn {
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background-color: var(--gray-100);
+    }
+
+    .mobile-close-btn {
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .user-profile-badge {
+        font-size: 13px;
+        padding: 8px 12px;
+        max-width: 100%;
+    }
+
+    .user-profile-badge i { flex: 0 0 auto; }
+
+    .user-profile-badge span {
+        min-width: 0;
+        overflow-wrap: break-word;
+        line-height: 1.4;
+    }
+
+    /* المحتوى */
+    .content-body {
+        padding: 18px max(16px, env(safe-area-inset-right)) 26px max(16px, env(safe-area-inset-left));
+    }
+
+    .section-card-full,
+    .recent-bookings-preview,
+    .work-area-pane {
+        padding: 18px;
+        border-radius: 12px;
+    }
+
+    .form-section-card { padding: 14px; }
+    .settings-form { margin-top: 14px; }
+
+    /* رؤوس الأقسام تلتف بدل الخروج */
+    .section-header-inline,
+    .pane-header {
+        flex-wrap: wrap;
+        gap: 12px;
+        row-gap: 10px;
+    }
+
+    .section-header-inline h2,
+    .section-header-inline h3,
+    .pane-header h2 {
+        flex: 1 1 100%;
+        font-size: 16px;
+    }
+
+    .pane-actions,
+    .section-header-inline > .btn {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .pane-actions .btn { flex: 1 1 auto; }
+    .search-box-sm { flex: 1 1 100%; width: 100%; }
+    .search-box-sm input { font-size: 16px; min-height: 44px; }
+
+    /* لافتة الترحيب */
+    .welcome-banner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        padding: 22px 18px;
+        margin-bottom: 20px;
+    }
+
+    .banner-text h1 { font-size: 20px; line-height: 1.4; }
+    .banner-text p { font-size: 13px; line-height: 1.7; }
+    .banner-action .btn { width: 100%; }
+
+    .dashboard-cards-grid { gap: 14px; margin-bottom: 20px; }
+
+    /* الحقول (16px لمنع تكبير iOS التلقائي عند التركيز) */
+    .form-grid { gap: 12px; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    .form-group label { font-size: 12px; line-height: 1.5; }
+
+    .form-control {
+        font-size: 16px;
+        min-height: 46px;
+        padding: 12px;
+    }
+
+    .dynamic-item-card { padding: 12px; }
+
+    /* أزرار وحقول لمسيّة مريحة */
+    .btn {
+        min-height: 44px;
+        padding: 11px 16px;
+        line-height: 1.4;
+    }
+
+    .btn i { flex: 0 0 auto; }
+    .btn span { min-width: 0; }
+    .btn-sm { min-height: 40px; padding: 9px 12px; }
+    .btn-icon { width: 44px; height: 44px; }
+
+    .btn-text {
+        min-width: 44px;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 8px;
+    }
+
+    .form-actions-bar { width: 100%; }
+    .form-actions-bar .btn { width: 100%; }
+    .modal-footer { flex-wrap: wrap; gap: 10px; }
+
+    /* النوافذ المنبثقة: لا تُقصّ على الشاشات الصغيرة */
+    .modal-overlay {
+        padding: 16px;
+        overflow-y: auto;
+        align-items: center;
+    }
+
+    .modal-box {
+        max-width: 480px;
+        max-height: calc(100vh - 32px);
+        overflow-y: auto;
+        padding: 18px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-header h3 { font-size: 15px; }
+
+    .modal-close-btn {
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* بطاقات شركات الطيران */
+    .airline-card { gap: 10px; flex-wrap: wrap; }
+    .airline-card-text { flex: 1 1 140px; }
+    .airline-card-actions { gap: 8px; }
+    .airline-card-logo { flex: 0 0 40px; }
+
+    /* جدول مضغوط (التمرير الأفقي محصور داخل الجدول فقط) */
+    .data-table { font-size: 12px; }
+    .data-table th, .data-table td { padding: 9px 10px; }
+}
+/* ============ (هـ) هواتف + لوحيات عمودية (<= 768px) ============ */
+@media screen and (max-width: 768px) {
+
+    /* عمود واحد للحقول — وإصلاح full-width التي كانت تُنشئ عموداً وهمياً */
+    .form-grid { grid-template-columns: minmax(0, 1fr); }
+    .form-group.full-width { grid-column: 1 / -1; }
+
+    /* عرض الجداول كبطاقات: لا تصغير الخط ولا تمرير أفقي، ولا إخفاء أي معلومة */
+    .table-responsive { overflow: visible; }
+
+    .data-table,
+    .data-table tbody,
+    .data-table tr {
+        display: block;
+        width: 100%;
+    }
+
+    .data-table thead { display: none; }
+
+    .data-table tbody tr {
+        background-color: var(--white);
+        border: 1px solid var(--gray-200);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        padding: 4px 2px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .data-table tbody tr:hover { background-color: var(--white); }
+
+    .data-table td {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 4px 12px;
+        padding: 9px 12px;
+        border-bottom: 1px dashed var(--gray-200);
+        text-align: right;
+        min-width: 0;
+        overflow-wrap: break-word;
+    }
+
+    html[dir="ltr"] .data-table td { text-align: left; }
+
+    .data-table td::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--navy);
+        white-space: nowrap;
+    }
+
+    .data-table td:last-child { border-bottom: none; }
+    .data-table td > * { min-width: 0; }
+    .data-table td[colspan] { justify-content: center; text-align: center !important; }
+    .data-table td[colspan]::before { content: none; }
+    .row-actions { width: 100%; }
+}
+
+/* ============ (و) هواتف صغيرة (<= 560px) ============ */
+@media screen and (max-width: 560px) {
+    .topbar-left,
+    .topbar-right { flex: 1 1 100%; }
+    .topbar-right { justify-content: space-between; }
+
+    .content-body { padding: 14px 12px 22px; }
+
+    .section-card-full,
+    .recent-bookings-preview,
+    .work-area-pane { padding: 14px; }
+
+    .welcome-banner { padding: 18px 14px; }
+    .banner-text h1 { font-size: 18px; }
+
+    .dash-card { padding: 14px; gap: 12px; }
+    .dash-icon { width: 44px; height: 44px; font-size: 19px; flex: 0 0 44px; }
+    .dash-info h3 { font-size: 20px; }
+
+    .preview-pane { padding: 12px; border-radius: 12px; }
+    .preview-pane-header { flex-direction: column; align-items: stretch; gap: 10px; }
+    .preview-badge { font-size: 12px; line-height: 1.5; }
+
+    .preview-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .preview-actions .btn { width: 100%; }
+    .preview-actions .btn-secondary { grid-column: 1 / -1; }
+
+    .modal-footer .btn { flex: 1 1 auto; }
+    .airline-card { padding: 14px; }
+}
+
+/* ============ (ز) هواتف صغيرة جداً (<= 380px) ============ */
+@media screen and (max-width: 380px) {
+    .content-body { padding: 12px 10px 20px; }
+    .btn { padding: 10px 12px; font-size: 13px; }
+    .form-control { font-size: 16px; padding: 11px 10px; }
+    .data-table td { padding: 8px 10px; }
+    .data-table td::before { font-size: 11px; }
+}
+
+/* ============ (ح) الوضع الأفقي على الهواتف (ارتفاع قصير) ============ */
+@media screen and (orientation: landscape) and (max-height: 520px) {
+    .topbar { min-height: 52px; padding-top: 6px; padding-bottom: 6px; gap: 8px; }
+    .topbar-select { min-height: 40px; }
+    .mobile-toggle-btn { width: 40px; height: 40px; flex-basis: 40px; }
+    .sidebar-nav { padding: 8px 0; gap: 2px; }
+    .nav-item { padding: 9px 20px; }
+    .content-body { padding: 14px 16px 20px; }
+}
+/* ==========================================================================
+   (ط) لوحة المعاينة الحيّة — خارج نطاق الـ PDF تماماً
+   .preview-pane ليست جزءاً من النسخة التي ينسخها html2pdf إطلاقاً،
+   لذا يمكن تعديلها بأمان تام على جميع المقاسات.
+   ========================================================================== */
+@media screen and (max-width: 1400px) {
+    .preview-pane {
+        position: static;
+        top: auto;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .preview-pane-header {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .preview-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+/* ==========================================================================
+   (ي) مستند التذكرة داخل المعاينة على الشاشات الصغيرة — معزول عن الـ PDF
+   كل قاعدة هنا تبدأ بـ "html body .preview-pane .itinerary-preview-document"
+   أي أنها تتطلب سلفاً من نوع .preview-pane لا يوجد أبداً في النسخة التي
+   ينسخها html2pdf  ←  لذلك لا يمكن أن تؤثر على ملف PDF إطلاقاً.
+   ========================================================================== */
+@media screen and (max-width: 900px) {
+
+    html body .preview-pane .itinerary-preview-document {
+        padding: 14px 12px 18px;
+        border-radius: 6px;
+        font-size: 12px;
+        /* علامة مائية زخرفية مُدوَّرة: قصّها داخل حدود المستند
+           حتى لا تُنتج تمريراً أفقياً على الشاشات الضيقة */
+        overflow: hidden;
+    }
+
+    html body .preview-pane .itinerary-preview-document .doc-watermark {
+        font-size: 96px;
+        letter-spacing: 6px;
+    }
+
+    /* ترويسة المستند: التف الأسطر لمنع خروج الشعار والاسم ورقم الحجز */
+    html body .preview-pane .itinerary-preview-document .doc-header {
+        flex-wrap: wrap;
+        gap: 10px 14px;
+        margin-bottom: 12px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .doc-company-info {
+        flex: 1 1 100%;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    html body .preview-pane .itinerary-preview-document .doc-logo-box {
+        width: 52px;
+        height: 52px;
+        border-radius: 28px;
+        font-size: 20px;
+        flex: 0 0 52px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .doc-company-info h2 {
+        font-size: 17px;
+        line-height: 1.35;
+        overflow-wrap: break-word;
+    }
+
+    html body .preview-pane .itinerary-preview-document .doc-company-info p {
+        font-size: 10px;
+        line-height: 1.5;
+    }
+
+    /* العمودان يبقيان ثابتين (يمين=شركة، يسار=معلومات) على الجوال أيضاً،
+       مع تصغير المسافات والخطوط فقط — لا انعكاس ولا دمج. */
+    html[dir] body .preview-pane .itinerary-preview-document .doc-header {
+        column-gap: 10px;
+        row-gap: 4px;
+    }
+
+    html[dir] body .preview-pane .itinerary-preview-document .doc-header > .doc-company-info {
+        gap: 8px;
+    }
+
+    html[dir] body .preview-pane .itinerary-preview-document #previewContactLine {
+        position: static !important;
+        top: auto !important;
+        bottom: auto !important;
+        left: auto !important;
+        right: auto !important;
+        margin: 0 !important;
+        z-index: auto !important;
+        transform: none !important;
+        width: auto;
+        flex-direction: column !important;
+        flex-wrap: nowrap;
+        align-items: flex-start !important;
+        justify-content: flex-start;
+        gap: 3px !important;
+        direction: ltr !important;
+        text-align: left !important;
+        font-size: 9px;
+        padding: 0 !important;
+        background: transparent !important;
+    }
+
+    html[dir] body .preview-pane .itinerary-preview-document #previewContactLine span {
+        font-size: 9px;
+        gap: 4px !important;
+        max-width: 100%;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    html[dir] body .preview-pane .itinerary-preview-document .doc-meta-badge {
+        position: static !important;
+        top: auto !important;
+        text-align: left !important;
+    }
+
+    html body .preview-pane .itinerary-preview-document .doc-pnr-display {
+        font-size: 18px;
+        letter-spacing: 0.5px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .doc-divider { margin: 10px 0; }
+
+    html body .preview-pane .itinerary-preview-document .doc-info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        padding: 10px;
+    }
+
+    /* التذييل: كان ثابتاً أسفل الصفحة فيتداخل مع المحتوى على الموبايل */
+    html body .preview-pane .itinerary-preview-document .doc-footer {
+        position: static !important;
+        bottom: auto !important;
+        left: auto !important;
+        right: auto !important;
+        margin-top: 14px;
+        padding-top: 10px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .page-2-header {
+        flex-wrap: wrap;
+        gap: 6px 12px;
+        font-size: 10px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .transit-waiting-banner,
+    html body .preview-pane .itinerary-preview-document .flight-details-footer,
+    html body .preview-pane .itinerary-preview-document .price-row {
+        flex-wrap: wrap;
+        gap: 4px 10px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card {
+        padding: 10px 12px;
+        margin-bottom: 8px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .flight-card-top {
+        flex-wrap: wrap;
+        gap: 6px 10px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .flight-airline-info {
+        min-width: 0;
+        max-width: 100%;
+        gap: 6px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .flight-airline-info span {
+        min-width: 0;
+        overflow-wrap: break-word;
+        line-height: 1.4;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .airline-logo-mini {
+        width: 34px !important;
+        height: 34px !important;
+        flex: 0 0 34px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .doc-notes-box {
+        padding: 8px 10px;
+    }
+}
+/* ===== (ك) شاشات عرض صغيرة جداً <= 640px: شبكة مسار الرحلة بثلاثة أعمدة ===== */
+@media screen and (max-width: 640px) {
+
+    /* علامة مائية أصغر على الهواتف الضيقة جداً */
+    html body .preview-pane .itinerary-preview-document .doc-watermark {
+        font-size: 64px;
+        letter-spacing: 3px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .doc-info-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* مسار الرحلة: 3 أعمدة مرنة (مغادرة | أيقونة | وصول) بلا انحراف أو قصّ */
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .flight-route-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr);
+        align-items: start;
+        gap: 6px;
+        padding: 10px 8px;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .flight-route-grid > div {
+        flex: none !important;
+        max-width: none !important;
+        min-width: 0;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .flight-route-grid .flight-middle-graphic {
+        width: 100%;
+        align-self: center;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .flight-route-grid .flight-city-name {
+        font-size: 15px !important;
+        line-height: 1.4;
+        overflow-wrap: break-word;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .flight-route-grid .flight-airport-code {
+        font-size: 11px !important;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .flight-route-grid .flight-time {
+        font-size: 13px !important;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-flight-card .flight-route-grid .flight-date {
+        font-size: 10px !important;
+    }
+
+    /* صفوف المسافرين: التف بدل الخروج */
+    html body .preview-pane .itinerary-preview-document .preview-passenger-row {
+        flex-wrap: wrap !important;
+        gap: 4px 10px !important;
+        padding: 8px 10px !important;
+    }
+
+    html body .preview-pane .itinerary-preview-document .preview-passenger-row > div {
+        width: 100%;
+        min-width: 0;
+        line-height: 1.5;
+        overflow-wrap: break-word;
+    }
+
+    html body .preview-pane .itinerary-preview-document .doc-section-heading {
+        font-size: 12px;
+        gap: 6px;
+    }
+}
+/* ===== (ل) أي جهاز يعمل باللمس (هاتف/لوحي) مهما كان عرضه =====
+   يضمن أهداف لمس ≥ 44px دون تغيير أي شيء في تخطيط سطح المكتب بالفأرة. */
+@media screen and (pointer: coarse) {
+    .search-global-box {
+        min-height: 46px;
+        padding: 0 12px;
+    }
+
+    .search-global-box input {
+        min-height: 44px;
+        padding: 0;
+    }
+
+    .modal-close-btn {
+        min-width: 40px;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-text {
+        min-width: 40px;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* الأزرار داخل الجداول (تعديل/معاينة/حذف) وأزرار الأدوات */
+    .btn-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .btn {
+        min-height: 44px;
+    }
+
+    .form-control,
+    .search-box-sm input,
+    .topbar-select {
+        min-height: 44px;
+    }
+
+    /* تمرير ناعم باللمس داخل الحقول القابلة للتمرير فقط */
+    .table-responsive,
+    .sidebar-nav {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+/* ==========================================================================
+   (م) زر "إرسال عبر الإيميل" — تحسين شكل فقط بدون تغيير أي خاصية أو وظيفة
+   ملاحظات العزل:
+   - الزر يقع داخل .preview-actions وهي NOT جزء من #itineraryPrintDoc،
+     لذلك لا يمكن أن يظهر أبداً داخل نسخة html2pdf.
+   - كما أن @media print يُخفي .preview-actions بـ display:none !important.
+   - وكل القواعد هنا داخل @media screen لضمان عدم تطبيقها عند الطباعة.
+   - لم يتم المساس بـ: onclick، الـ id، النص، الأيقونة، أو حجم/ارتفاع الزر.
+   ========================================================================== */
+@media screen {
+
+    /* ملاحظة: هذه القواعد تغيّر اللون والظل والحركة فقط.
+       لا تعديل على font-weight أو border أو padding أو الأبعاد
+       حتى يبقى حجم الزر وموضعه كما هو تماماً (يرث font-weight من .btn). */
+
+    .btn-mail {
+        background-image: linear-gradient(135deg, var(--aviation-blue) 0%, var(--sky-blue) 100%);
+        background-color: var(--aviation-blue);
+        color: var(--white);
+        box-shadow: 0 2px 6px rgba(30, 58, 138, 0.22);
+    }
+
+    .btn-mail i {
+        flex: 0 0 auto;
+        transition: transform 0.25s ease;
+    }
+
+    .btn-mail:hover {
+        background-image: linear-gradient(135deg, var(--navy) 0%, var(--aviation-blue) 100%);
+        background-color: var(--navy);
+        color: var(--white);
+        box-shadow: 0 6px 16px rgba(10, 25, 47, 0.28);
+        transform: translateY(-1px);
+    }
+
+    .btn-mail:hover i {
+        transform: translateY(-1px) scale(1.08);
+    }
+
+    .btn-mail:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(30, 58, 138, 0.22);
+    }
+
+    /* حالة التركيز الواضحة للوصولية بلوحة المفاتيح */
+    .btn-mail:focus-visible {
+        outline: 3px solid rgba(59, 130, 246, 0.5);
+        outline-offset: 2px;
+    }
+
+    /* ===================== زر الطباعة (تحسين مظهر فقط) =====================
+       لا تغيير في: id، type، title، الأيقونة، أو الأبعاد (يرثها من .btn-icon). */
+    .btn-print {
+        background-image: linear-gradient(135deg, var(--navy) 0%, var(--aviation-blue) 100%);
+        background-color: var(--navy);
+        color: var(--white);
+        border-color: transparent;
+        box-shadow: 0 2px 6px rgba(10, 25, 47, 0.24);
+    }
+
+    .btn-print i {
+        color: var(--white);
+        transition: transform 0.25s ease;
+    }
+
+    .btn-print:hover {
+        background-image: linear-gradient(135deg, #000000 0%, var(--navy) 100%);
+        background-color: #000000;
+        color: var(--white);
+        border-color: transparent;
+        box-shadow: 0 6px 14px rgba(10, 25, 47, 0.32);
+    }
+
+    .btn-print:hover i { transform: translateY(-1px) scale(1.08); }
+
+    .btn-print:active {
+        box-shadow: 0 2px 6px rgba(10, 25, 47, 0.24);
+    }
+
+    .btn-print:focus-visible {
+        outline: 3px solid rgba(59, 130, 246, 0.5);
+        outline-offset: 2px;
+    }
+
+    /* ===================== زر تصدير PDF (تحسين مظهر فقط) ===================== */
+    .btn-pdf {
+        background-image: linear-gradient(135deg, #B91C1C 0%, #EF4444 100%);
+        background-color: #B91C1C;
+        color: var(--white);
+        border-color: transparent;
+        box-shadow: 0 2px 6px rgba(185, 28, 28, 0.26);
+    }
+
+    .btn-pdf i {
+        color: var(--white);
+        transition: transform 0.25s ease;
+    }
+
+    .btn-pdf:hover {
+        background-image: linear-gradient(135deg, #7F1D1D 0%, #DC2626 100%);
+        background-color: #7F1D1D;
+        color: var(--white);
+        border-color: transparent;
+        box-shadow: 0 6px 14px rgba(127, 29, 29, 0.34);
+    }
+
+    .btn-pdf:hover i { transform: translateY(-1px) scale(1.08); }
+
+    .btn-pdf:active {
+        box-shadow: 0 2px 6px rgba(185, 28, 28, 0.26);
+    }
+
+    .btn-pdf:focus-visible {
+        outline: 3px solid rgba(239, 68, 68, 0.5);
+        outline-offset: 2px;
+    }
+}
+/* =====================================================================
+   قسم الذكاء الاصطناعي لتحليل المستندات
+   وحدة مستقلة — لا تغيّر أي تنسيق قائم.
+   ===================================================================== */
+
+.ai-root { display: flex; flex-direction: column; gap: 16px; }
+
+.ai-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.ai-head h2 { display: flex; align-items: center; gap: 9px; margin: 0; font-size: 20px; color: var(--navy); }
+.ai-head h2 i { color: var(--aviation-blue); }
+.ai-head-text p { margin: 6px 0 0; font-size: 14px; color: var(--gray-500); line-height: 1.7; }
+
+.ai-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 999px;
+    font-size: 12.5px; font-weight: 700; white-space: nowrap;
+    border: 1px solid transparent;
+}
+.ai-status.checking { background: #eef2f7; color: var(--gray-500); border-color: #dbe2ea; }
+.ai-status.ok { background: rgba(16,163,94,.1); color: #0f9d5c; border-color: rgba(16,163,94,.3); }
+.ai-status.down { background: rgba(220,38,38,.08); color: #c62828; border-color: rgba(220,38,38,.28); }
+
+.ai-dropzone {
+    border: 2px dashed #c8d3e0; border-radius: 16px;
+    background: linear-gradient(180deg, #f8fbff 0%, #f2f6fb 100%);
+    padding: 30px 20px; text-align: center; cursor: pointer;
+    transition: border-color .2s ease, background .2s ease;
+}
+.ai-dropzone:hover, .ai-dropzone.ai-drag {
+    border-color: var(--aviation-blue);
+    background: linear-gradient(180deg, #eef5ff 0%, #e6effc 100%);
+}
+.ai-drop-icon { font-size: 40px; color: var(--aviation-blue); opacity: .75; }
+.ai-drop-hint { margin: 12px 0 16px; font-size: 14.5px; color: var(--navy); font-weight: 600; }
+.ai-drop-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.ai-formats { margin: 14px 0 0; font-size: 12.5px; color: var(--gray-500); }
+
+.ai-chip {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; border-radius: 12px;
+    background: #eef5ff; border: 1px solid #cfe0fb;
+    color: var(--navy); font-size: 13.5px;
+}
+.ai-chip .ai-file-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-chip .ai-file-size { color: var(--gray-500); font-size: 12.5px; }
+.ai-chip .ai-file-clear {
+    margin-inline-start: auto; border: none; background: transparent;
+    color: var(--gray-500); cursor: pointer; font-size: 15px;
+    padding: 4px 6px; border-radius: 8px;
+}
+.ai-chip .ai-file-clear:hover { background: rgba(0,0,0,.06); color: #c62828; }
+
+.ai-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.ai-actions-review { justify-content: flex-start; border-top: 1px solid var(--gray-200); padding-top: 14px; }
+
+.ai-settings { border: 1px solid var(--gray-200); border-radius: 12px; padding: 0 14px; background: #fbfcfe; }
+.ai-settings summary {
+    cursor: pointer; padding: 12px 0; font-size: 14px; font-weight: 700;
+    color: var(--navy); list-style: none;
+    display: flex; align-items: center; gap: 8px;
+}
+.ai-settings summary::-webkit-details-marker { display: none; }
+.ai-settings-body { padding-bottom: 14px; }
+.ai-settings-body label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.ai-settings-row { display: flex; gap: 8px; }
+.ai-settings-row .form-control { flex: 1 1 auto; min-width: 0; }
+.ai-note { margin: 10px 0 0; font-size: 12.5px; color: #0f9d5c; display: flex; gap: 7px; align-items: flex-start; line-height: 1.7; }
+
+.ai-progress { text-align: center; padding: 34px 10px; }
+.ai-progress-icon { font-size: 42px; color: var(--aviation-blue); animation: ai-pulse 1.5s ease-in-out infinite; }
+@keyframes ai-pulse { 0%,100% { opacity:.45; transform: scale(.96); } 50% { opacity:1; transform: scale(1.04); } }
+.ai-progress-text { margin: 16px 0 14px; font-size: 15.5px; font-weight: 700; color: var(--navy); }
+.ai-progress-track { height: 9px; border-radius: 999px; background: #e6ecf3; overflow: hidden; max-width: 520px; margin: 0 auto; }
+.ai-progress-bar {
+    height: 100%; width: 0; border-radius: 999px;
+    background: linear-gradient(90deg, var(--aviation-blue) 0%, var(--sky-blue) 100%);
+    transition: width .45s ease;
+/* ------- شاشة المراجعة: جنباً إلى جنب على الشاشات الكبيرة ------- */
+.ai-tabs { display: none; gap: 8px; margin-bottom: 12px; }
+.ai-tab {
+    flex: 1 1 0; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid var(--gray-200); background: #fff;
+    font-size: 14px; font-weight: 700; color: var(--gray-500);
+    cursor: pointer; font-family: inherit;
+}
+.ai-tab.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+.ai-split { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+.ai-pane {
+    border: 1px solid var(--gray-200); border-radius: 14px;
+    background: #fff; overflow: hidden; min-width: 0;
+}
+.ai-pane-doc { background: #f4f6f9; position: sticky; top: 0; max-height: 74vh; overflow: auto; }
+.ai-doc-frame { width: 100%; height: 70vh; border: 0; display: block; background: #fff; }
+.ai-doc-img { width: 100%; height: auto; display: block; }
+.ai-doc-empty { padding: 40px; text-align: center; color: var(--gray-500); font-size: 30px; }
+.ai-pane-data { max-height: 78vh; overflow: auto; padding: 14px; }
+
+/* ------- عناوين وبطاقات النتائج ------- */
+.ai-review-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.ai-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 11px; border-radius: 999px;
+    background: #eef5ff; color: var(--aviation-blue);
+    font-size: 12.5px; font-weight: 700;
+}
+.ai-badge-lang { background: #f3eefe; color: #6d28d9; }
+.ai-badge-warn { background: rgba(245,158,11,.12); color: #b45309; }
+.ai-sub-title {
+    margin: 16px 0 10px; font-size: 15px; font-weight: 800;
+    color: var(--navy); padding-bottom: 7px;
+    border-bottom: 2px solid rgba(30,58,138,.09);
+}
+.ai-alerts { display: flex; flex-direction: column; gap: 8px; }
+.ai-alert {
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3);
+    color: #92400e; font-size: 13.5px; line-height: 1.7;
+}
+.ai-empty { color: var(--gray-500); font-size: 13.5px; padding: 8px 0; }
+
+.ai-card { border: 1px solid var(--gray-200); border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+.ai-card-head {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 10px 12px; background: #f7f9fc;
+    border-bottom: 1px solid var(--gray-200); font-size: 13.5px; font-weight: 700; color: var(--navy);
+}
+.ai-pick { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--gray-500); cursor: pointer; }
+.ai-bulk { display: flex; gap: 8px; margin: -4px 0 12px; }
+
+/* تحذير التكرار */
+.ai-dup-box {
+    margin: 10px 12px; padding: 10px 12px; border-radius: 10px;
+    background: rgba(59,130,246,.07); border: 1px solid rgba(59,130,246,.28);
+    color: #1e40af; font-size: 13px; line-height: 1.7;
+}
+.ai-dup-active { background: rgba(59,130,246,.16); border-color: var(--aviation-blue); }
+.ai-dup-actions { display: flex; gap: 8px; margin-top: 9px; flex-wrap: wrap; }
+
+/* ------- جدول الحقول ------- */
+.ai-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.ai-table th {
+    text-align: start; padding: 9px 10px;
+/* =====================================================================
+   الجوال: التبويبات بدل العرض جنباً إلى جنب (المتطلّب #14)
+   ===================================================================== */
+@media screen and (max-width: 900px) {
+    .ai-tabs { display: flex; }
+    .ai-split { grid-template-columns: 1fr; }
+    .ai-pane { max-height: none; }
+    .ai-pane-doc { position: static; max-height: 62vh; }
+    .ai-doc-frame { height: 58vh; }
+    .ai-pane-data { max-height: none; overflow: visible; padding: 12px; }
+    .ai-split:not(.ai-show-doc) .ai-pane-doc,
+    .ai-split:not(.ai-show-data) .ai-pane-data { display: none; }
+    .ai-actions-review { justify-content: stretch; }
+    .ai-actions-review .btn { flex: 1 1 auto; }
+}
+
+@media screen and (max-width: 560px) {
+    .ai-dropzone { padding: 22px 14px; }
+    .ai-drop-icon { font-size: 32px; }
+    .ai-drop-actions .btn { width: 100%; }
+    .ai-settings-row { flex-direction: column; }
+    .ai-row-conf { width: 44px; }
+    .ai-row-src { display: none; }
+    .ai-head h2 { font-size: 17px; }
+/* تغذية راجعة لحفظ المفتاح */
+.ai-note-ok { color: #0f9d5c; background: rgba(16,163,94,.09); border: 1px solid rgba(16,163,94,.3); padding: 9px 12px; border-radius: 10px; }
+.ai-note-err { color: #b3261e; background: rgba(220,38,38,.07); border: 1px solid rgba(220,38,38,.28); padding: 9px 12px; border-radius: 10px; }
+.ai-note-muted { color: var(--gray-500); }
+
+/* =====================================================================
+   الجوال: التبويبات بدل العرض جنباً إلى جنب (المتطلّب #14)
+   ===================================================================== */
+}
+    background: #fafbfd; color: var(--gray-500);
+    font-size: 12px; font-weight: 800; text-transform: none;
+    border-bottom: 1px solid var(--gray-200);
+}
+.ai-table td { padding: 8px 10px; border-bottom: 1px solid #f1f4f8; vertical-align: middle; }
+.ai-row-label { color: var(--navy); font-weight: 600; }
+.ai-row-value .ai-edit {
+    width: 100%; min-width: 0;
+    border: 1px solid #d7dee8; border-radius: 8px;
+    padding: 7px 9px; font-size: 13.5px; font-family: inherit;
+    background: #fff; color: var(--navy);
+}
+.ai-row-value .ai-edit:focus { outline: 2px solid rgba(59,130,246,.35); border-color: var(--aviation-blue); }
+.ai-row-conf { white-space: nowrap; font-size: 15px; text-align: center; width: 54px; }
+.ai-row-src { display: block; font-size: 10.5px; color: var(--gray-500); max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+/* تلوين الصف حسب مستوى الثقة (بدون أرقام تقنية) */
+.ai-lvl-low { background: rgba(220,38,38,.06); }
+.ai-lvl-medium { background: rgba(245,158,11,.08); }
+.ai-lvl-empty td { opacity: .6; }
+
+/* ------- سجل التحليل ------- */
+.ai-log { margin-top: 6px; border-top: 1px solid var(--gray-200); padding-top: 4px; }
+.ai-log-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 210px; overflow: auto; }
+.ai-log-item {
+    display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+    padding: 8px 10px; border-radius: 9px;
+    background: #f8fafc; border: 1px solid #eef2f6;
+    font-size: 12.5px; color: var(--gray-600, #556);
+}
+.ai-log-dot { width: 8px; height: 8px; border-radius: 50%; background: #16a34a; flex: 0 0 auto; }
+.ai-log-item.bad .ai-log-dot { background: #dc2626; }
+.ai-log-when { font-variant-numeric: tabular-nums; }
+.ai-log-count { margin-inline-start: auto; font-weight: 700; color: var(--navy); }
+.ai-log-err { color: #c62828; font-weight: 600; }
+.ai-log-empty { color: var(--gray-500); font-size: 13px; padding: 6px 0; }
+
+/* INSERT_AI_CSS_3 */
+}
+
+.ai-error {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px; border-radius: 12px;
+    background: rgba(220,38,38,.07); border: 1px solid rgba(220,38,38,.25);
+    color: #b3261e; font-size: 14px; line-height: 1.8;
+}
+
+/* INSERT_AI_CSS_2 */
